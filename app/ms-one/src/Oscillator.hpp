@@ -69,6 +69,7 @@ public:
         // return sound;
     }
 
+    // int count;
     void setFreqFromVOct(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
     {
 #ifdef USE_TABLE
@@ -78,10 +79,21 @@ public:
 #else
         // V/Octは1V上がるごとに1Octave
         // 基準周波数 * pow(2, 電圧)
-        int freq = octaves[oct] * semitones[semi] *
+        int freq = pgm_read_float(&octaves[oct]) * pgm_read_float(&semitones[semi]) *
                        (float)pow(2, map(vOct, 0, 1024, 0, DAC_MAX_MILLVOLT) * 0.001) +
                    add;
 #endif
+        // if (osc == Select::OSC01)
+        // {
+        //     count = (count+1)&0x3FF;
+        //     if (count == 0)
+        //     {
+        //         Serial.print(vOct);
+        //         Serial.print(",");
+        //         Serial.println(freq);
+        //     }
+        // }
+
         freq = constrain(freq, 0, 32767);
         int wave = osc == Select::OSC01 ? _wave01 : _wave02;
         waveTable[(int)osc][wave]->setFreq(freq);
