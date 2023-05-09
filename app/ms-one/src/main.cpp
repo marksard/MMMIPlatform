@@ -145,6 +145,8 @@ void randomSequencer()
             seq2PPQ = 0;
             digitalWrite(GATE_PIN, LOW);
             rs.resetSeq();
+            envFlt.noteOff();
+            envAmp.noteOff();
             return;
         }
 
