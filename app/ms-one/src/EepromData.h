@@ -9,7 +9,7 @@
 #include <EEPROM.h>
 
 // 設定値系
-const static char *UI_VER = "ms01conf_004\0";
+const static char *UI_VER = "ms01conf_001\0";
 struct UserConfig
 {
     char ver[14];
@@ -18,10 +18,11 @@ struct UserConfig
     byte inputOctVorMIDI; // 0:cv 1:usbmidi 2:randomseq
     byte seqMaxStep;
     byte seqBPM;
+    byte setVOctCalibration;
 };
 
 // 操作系パラメータ現在値
-const static char *PARAM_VER = "ms01param004\0";
+const static char *PARAM_VER = "ms01param001\0";
 struct UserParameters
 {
     char ver[14];
@@ -75,6 +76,7 @@ void initUserConfig(UserConfig *pUserConfig)
     pUserConfig->inputOctVorMIDI = 2;
     pUserConfig->seqMaxStep = 8;
     pUserConfig->seqBPM = 133;
+    pUserConfig->setVOctCalibration = 100;
 }
 
 void loadUserConfig(UserConfig *pUserConfig)

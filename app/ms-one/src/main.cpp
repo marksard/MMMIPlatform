@@ -209,6 +209,7 @@ void updateControl()
     // その他の操作による設定の更新
     if (changed)
     {
+        osc.setVOctCalibration(conf.setVOctCalibration);
         osc.setBalance(params.osc01_vol);
         osc.setWave(Oscillator::Select::OSC01, (Oscillator::Wave)params.osc01_wave);
         osc.setWave(Oscillator::Select::OSC02, (Oscillator::Wave)params.osc02_wave);

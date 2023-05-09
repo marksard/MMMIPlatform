@@ -50,6 +50,7 @@ public:
         _wave02 = 0;
         _level01 = 4;
         _level02 = 4;
+        _vOctCalibration = 100.0;
         _osc01Saw.setTable(PHASOR256_DATA);
         _osc02Saw.setTable(PHASOR256_DATA);
         _osc01Sw2.setTable(ACIDSAW_C_DATA);
@@ -74,8 +75,7 @@ public:
     {
 #ifdef USE_TABLE
         int freq = pgm_read_float(&octaves[oct]) * pgm_read_float(&semitones[semi]) *
-                       pgm_read_float(&volt_table_pow2[vOct]) +
-                   add;
+                       pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration + add;
 #else
         // V/Octは1V上がるごとに1Octave
         // 基準周波数 * pow(2, 電圧)
@@ -131,6 +131,11 @@ public:
         _level02 = _balLevel02[value];
     }
 
+    void setVOctCalibration(byte value)
+    {
+        _vOctCalibration = value * 0.01;
+    }
+
 private:
     byte _balLevel01[9] = {0, 0, 0, 1, 1, 2, 3, 4, 8};
     byte _balLevel02[9] = {8, 4, 3, 2, 1, 1, 0, 0, 0};
@@ -140,6 +145,7 @@ protected:
     int _wave02;
     byte _level01;
     byte _level02;
+    float _vOctCalibration;
 
     Oscil<256, AUDIO_RATE> _osc01Saw;
     Oscil<256, AUDIO_RATE> _osc02Saw;

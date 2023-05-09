@@ -37,7 +37,7 @@ byte oledPow = 1;
 const char title10[] PROGMEM = "RandSequencer";
 const char title1[] PROGMEM = "Osc 1        ";
 const char title2[] PROGMEM = "Osc 2        ";
-const char title3[] PROGMEM = "Filter/OscBal";
+const char title3[] PROGMEM = "Filter/OscSet";
 const char title4[] PROGMEM = "Filter Env   ";
 const char title5[] PROGMEM = "Amp Env      ";
 const char title6[] PROGMEM = "LFO          ";
@@ -61,7 +61,7 @@ const char *const titleTable[MENUMAX] PROGMEM =
 const char param10[] PROGMEM = "BPM  step chg  play";
 const char param1[] PROGMEM = "wave oct  semi tune";
 const char param2[] PROGMEM = "wave oct  semi tune";
-const char param3[] PROGMEM = "freq reso 1<>2 ----";
+const char param3[] PROGMEM = "freq reso 1<>2 calb";
 const char param4[] PROGMEM = "attk dcay rels amnt";
 const char param5[] PROGMEM = "attk dcay rels amnt";
 const char param6[] PROGMEM = "rate >chr >osc >frq";
@@ -101,7 +101,7 @@ byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
         {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_4bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
-        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &min_zero, &min_zero}},
+        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_8bit, &min_one}},
         {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}},
         {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}},
         {{&min_one, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_amnt, &min_one}},
@@ -115,7 +115,7 @@ void *valueTable[MENUMAX][MENUCOL] =
         {&conf.seqBPM, &conf.seqMaxStep, &seqChange, &seqStart},
         {&params.osc01_wave, &params.osc01_oct, &params.osc01_semi, &params.osc01_detune},
         {&params.osc02_wave, &params.osc02_oct, &params.osc02_semi, &params.osc02_detune},
-        {&params.flt_Freq, &params.flt_Reso, &params.osc01_vol, &nullItem},
+        {&params.flt_Freq, &params.flt_Reso, &params.osc01_vol, &conf.setVOctCalibration},
         {&params.envFlt_attack, &params.envFlt_decay, &params.envFlt_release, &params.envFlt_amount},
         {&params.envAmp_attack, &params.envAmp_decay, &params.envAmp_release, &params.envAmp_amount},
         {&params.lfo01_freq, &params.lfo01_amt_chorus, &params.lfo01_amt_osc02, &params.lfo01_amt_ffreq},
