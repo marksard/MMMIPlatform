@@ -2,7 +2,7 @@
  * Oscillator class
  * 2オシレータをまとめたの
  * Copyright 2023 marksard
- */ 
+ */
 
 #pragma once
 
@@ -17,10 +17,26 @@
 #define OSC_MAX 4
 
 // 電源供給の関係で数%程度変わるので可能なら合わせること(単位：mV)
-#define DAC_MAX_MILLVOLT 4800
+#define DAC_MAX_MILLVOLT 4650
 
-// テーブルを使う場合（演算が少なくなるので速い）
-#define USE_TABLE
+class OscillatorValues
+{
+public:
+    int _wave;
+    byte _level;
+    float _octSemiValue;
+    byte _oct;
+    byte _semi;
+
+    OscillatorValues()
+    {
+        _wave = 0;
+        _level = 4;
+        _octSemiValue = 0.0;
+        _oct = 255;
+        _semi = 255;
+    }
+};
 
 class Oscillator
 {
@@ -46,10 +62,6 @@ public:
 
     void init()
     {
-        _wave01 = 0;
-        _wave02 = 0;
-        _level01 = 4;
-        _level02 = 4;
         _vOctCalibration = 100.0;
         _osc01Saw.setTable(PHASOR256_DATA);
         _osc02Saw.setTable(PHASOR256_DATA);
@@ -63,72 +75,61 @@ public:
 
     AudioOutput_t next()
     {
-        int16_t osc01Next = waveTable[0][_wave01]->next();
-        int16_t osc02Next = waveTable[1][_wave02]->next();
-        int16_t sound = (osc01Next >> _level01) + (osc02Next >> _level02);
+        int16_t osc01Next = waveTable[0][_oscValues[0]._wave]->next();
+        int16_t osc02Next = waveTable[1][_oscValues[1]._wave]->next();
+        int16_t sound = (osc01Next >> _oscValues[0]._level) +
+                        (osc02Next >> _oscValues[1]._level);
         return constrain(sound, -128, 127); // as limitter
         // return sound;
     }
 
-    // int count;
-    void setFreqFromVOct(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
+    void setFreqFromVOctCalc(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
     {
-#ifdef USE_TABLE
-        int freq = pgm_read_float(&octaves[oct]) * pgm_read_float(&semitones[semi]) *
-                       pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration + add;
-#else
+        updateOctSemiValue(osc, oct, semi);
         // V/Octは1V上がるごとに1Octave
         // 基準周波数 * pow(2, 電圧)
-        int freq = pgm_read_float(&octaves[oct]) * pgm_read_float(&semitones[semi]) *
-                       (float)pow(2, map(vOct, 0, 1024, 0, DAC_MAX_MILLVOLT) * 0.001) +
+        int freq = _oscValues[(int)osc]._octSemiValue *
+                       (float)pow(2, map(vOct, 0, 1024, 0, DAC_MAX_MILLVOLT) * 0.001) * _vOctCalibration +
                    add;
-#endif
-        // if (osc == Select::OSC01)
-        // {
-        //     count = (count+1)&0x3FF;
-        //     if (count == 0)
-        //     {
-        //         Serial.print(vOct);
-        //         Serial.print(",");
-        //         Serial.println(freq);
-        //     }
-        // }
-
         freq = constrain(freq, 0, 32767);
-        int wave = osc == Select::OSC01 ? _wave01 : _wave02;
+        int wave = _oscValues[(int)osc]._wave;
+        waveTable[(int)osc][wave]->setFreq(freq);
+    }
+
+    void setFreqFromVOct(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
+    {
+        updateOctSemiValue(osc, oct, semi);
+        int freq = _oscValues[(int)osc]._octSemiValue *
+                       pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration +
+                   add;
+        freq = constrain(freq, 0, 32767);
+        int wave = _oscValues[(int)osc]._wave;
         waveTable[(int)osc][wave]->setFreq(freq);
     }
 
     void setFreq_Q16n16(Select osc, byte midiNote, byte oct, byte semi, int16_t add)
     {
         Q16n16 note = Q16n16_mtof(Q8n0_to_Q16n16(((oct + 1) * 12) + semi + midiNote));
-        int wave = osc == Select::OSC01 ? _wave01 : _wave02;
+        int wave = _oscValues[(int)osc]._wave;
         waveTable[(int)osc][wave]->setFreq_Q16n16(note + Q15n0_to_Q15n16(add));
     }
 
     void setFreq_Q16n16(Select osc, Q16n16 note)
     {
-        int wave = osc == Select::OSC01 ? _wave01 : _wave02;
+        int wave = _oscValues[(int)osc]._wave;
         waveTable[(int)osc][wave]->setFreq_Q16n16(note);
     }
 
     void setWave(Select osc, Wave wave)
     {
-        if (osc == Select::OSC01)
-        {
-            _wave01 = (int)wave;
-        }
-        else
-        {
-            _wave02 = (int)wave;
-        }
+        _oscValues[(int)osc]._wave = (int)wave;
     }
 
     void setBalance(byte value)
     {
         value = constrain(value, 0, 8);
-        _level01 = _balLevel01[value];
-        _level02 = _balLevel02[value];
+        _oscValues[0]._level = _balLevel01[value];
+        _oscValues[1]._level = _balLevel02[value];
     }
 
     void setVOctCalibration(byte value)
@@ -140,12 +141,20 @@ private:
     byte _balLevel01[9] = {0, 0, 0, 1, 1, 2, 3, 4, 8};
     byte _balLevel02[9] = {8, 4, 3, 2, 1, 1, 0, 0, 0};
 
+    void updateOctSemiValue(Select osc, byte oct, byte semi)
+    {
+        // 計算量を減らすため設定変更時のみ再計算
+        if (oct != _oscValues[(int)osc]._oct || semi != _oscValues[(int)osc]._semi)
+        {
+            _oscValues[(int)osc]._oct = oct;
+            _oscValues[(int)osc]._semi = semi;
+            _oscValues[(int)osc]._octSemiValue = pgm_read_float(&octaves[oct]) * pgm_read_float(&semitones[semi]);
+        }
+    }
+
 protected:
-    int _wave01;
-    int _wave02;
-    byte _level01;
-    byte _level02;
     float _vOctCalibration;
+    OscillatorValues _oscValues[2];
 
     Oscil<256, AUDIO_RATE> _osc01Saw;
     Oscil<256, AUDIO_RATE> _osc02Saw;
