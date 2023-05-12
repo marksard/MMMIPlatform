@@ -2,7 +2,7 @@
  * RandomSequencer class
  * 良い感じに適当にシーケンスさせるやつ
  * Copyright 2023 marksard
- */ 
+ */
 
 #pragma once
 
@@ -49,7 +49,7 @@ public:
 
     /// @brief EventDelayに同じ
     /// @return
-    bool ready()
+    virtual bool ready()
     {
         return _ed.ready();
     }
@@ -62,7 +62,7 @@ public:
 
     /// @brief 次のステップに遷移
     /// @param endStep 折り返すステップ数
-    void next(byte endStep)
+    virtual void next(byte endStep)
     {
         _seqIndex = (_seqIndex + 1) >=
                             (endStep > MAX_SEQ ? MAX_SEQ : endStep)
@@ -73,7 +73,7 @@ public:
 
     /// @brief シーケンスリセット
     /// @return
-    void resetSeq()
+    virtual void resetSeq()
     {
         _seqIndex = 0;
         _ed.start();
@@ -128,4 +128,55 @@ private:
     byte _seqIndex = 0;
     byte _step[MAX_SEQ] = {0};
     byte _seq[MAX_SEQ] = {0};
+};
+
+class AutoRandomSequencer : public RandomSequencer
+{
+public:
+    AutoRandomSequencer() : RandomSequencer()
+    {
+        _changeBar = 16;
+        _changeStart = 0;
+        _barCount = 0;
+    }
+
+    void autoChanger(byte on)
+    {
+        _changeStart = on;
+        _barCount = 0;
+    }
+
+    void setChangeBar(byte changeBar)
+    {
+        _changeBar = changeBar;
+    }
+
+    bool ready() override
+    {
+        if ((_barCount >> 4) >= _changeBar && _changeStart)
+        {
+            generate();
+            _barCount = 0;
+        }
+        // Serial.println(_barCount);
+
+        return RandomSequencer::ready();
+    }
+
+    void next(byte endStep) override
+    {
+        _barCount++;
+        RandomSequencer::next(endStep);
+    }
+
+    void resetSeq() override
+    {
+        _barCount = 0;        
+        RandomSequencer::resetSeq();
+    }
+
+private:
+    byte _changeBar;
+    byte _changeStart;
+    uint16_t _barCount;
 };
