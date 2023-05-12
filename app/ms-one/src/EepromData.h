@@ -6,7 +6,17 @@
 
 #pragma once
 
+#include <Arduino.h>
 #include <EEPROM.h>
+
+void initEEPROM()
+{
+#if defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_MBED)
+    EEPROM.begin(1024);
+#else
+    EEPROM.begin();
+#endif
+}
 
 // 設定値系
 const static char *UI_VER = "ms01conf_001\0";
@@ -91,6 +101,9 @@ void loadUserConfig(UserConfig *pUserConfig)
 void saveUserConfig(UserConfig *pUserConfig)
 {
     EEPROM.put<UserConfig>(startUserConfigAddress, *pUserConfig);
+#if defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_MBED)
+    EEPROM.commit();
+#endif
 }
 
 void saveSelectedSlot(byte selectedSlot)
@@ -135,11 +148,11 @@ void initUserParameters(UserParameters *pParams)
     pParams->flt_Freq = 47;
     pParams->flt_Reso = 240;
 
-    pParams->chorus_feedback = 56;
-    pParams->chorus_time = 16;
-    pParams->chorus_level = 0;
+    pParams->chorus_feedback = 127;
+    pParams->chorus_time = 127;
+    pParams->chorus_level = 7;
 
-    pParams->driveLevel = 1;
+    pParams->driveLevel = 0;
 }
 
 void loadUserParameters(UserParameters *pParams, int selectSlot)
@@ -169,4 +182,7 @@ void saveUserParameters(UserParameters *pParams, int selectSlot)
     EEPROM.put<UserParameters>(startUserParametersAddress +
                                    (sizeof(UserParameters) * selectSlot),
                                *pParams);
+#if defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_MBED)
+    EEPROM.commit();
+#endif
 }
