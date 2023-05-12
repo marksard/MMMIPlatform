@@ -180,6 +180,7 @@ void randomSequencer()
 void setup()
 {
     // Serial.begin(4800);
+    initEEPROM();
     initOLED();
     loadUserConfig(&conf);
     loadUserParameters(&params, conf.selectedSlot);
@@ -193,8 +194,15 @@ void setup()
 
 void updateControl()
 {
+    static byte lastInputOctVorMIDI = 255;
     // ユーザー操作系の取得とOLED更新
     byte changed = updateUserIF();
+
+    if (lastInputOctVorMIDI != conf.inputOctVorMIDI)
+    {
+        lastInputOctVorMIDI = conf.inputOctVorMIDI;
+        pinMode(GATE_PIN, lastInputOctVorMIDI == 0 ? INPUT_PULLUP : OUTPUT);
+    }
 
     // 入力端子、MIDI、シーケンサーからの入力受付、エンベロープとオシレータ周波数の更新
     if (conf.inputOctVorMIDI == 0)
