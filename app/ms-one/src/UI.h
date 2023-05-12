@@ -1,6 +1,6 @@
 #pragma once
 #include <Tiny4kOLED_tiny-i2c.h> // 2.2.2 or later
-#include <TinyI2CMaster.h>
+// #include <TinyI2CMaster.h>
 #include "RotaryEncoderMozzi.hpp"
 #include "ButtonMozzi.hpp"
 #include "EEPROMData.h"
@@ -130,17 +130,18 @@ void initOLED()
 {
     // OLED初期化前にI2Cの開始待ちをちゃんとおこなう
     // https://github.com/datacute/Tiny4kOLED/issues/20
-    TinyI2C.init();
-    while (!TinyI2C.start(0x3C, 0))
-    {
-        delay(10);
-    }
-    TinyI2C.stop();
-    delay(50);
+    // TinyI2C.init();
+    // while (!TinyI2C.start(0x3C, 0))
+    // {
+    //     delay(10);
+    // }
+    // TinyI2C.stop();
+    // delay(50);
     // ここからOLED初期化
     oled.begin(sizeof(tiny4koled_init_128x32), tiny4koled_init_128x32);
     oled.setFont(FONT6X8);
-    oled.setRotation(180);
+    oled.setContrast(64);
+    oled.setRotation(0);
     oled.on();
     oled.clear();
     delay(100);
@@ -155,11 +156,11 @@ void dispOLED(byte menuIndex)
     if (menuIndexPrev != menuIndex)
     {
         menuIndexPrev = menuIndex;
+        strcpy_P(disp_buf, (const char *)pgm_read_ptr(&titleTable[menuIndex]));
         oled.setCursor(0, 0);
-        strcpy_P(disp_buf, (char *)pgm_read_word(&titleTable[menuIndex]));
         oled.print(disp_buf);
+        strcpy_P(disp_buf, (const char *)pgm_read_ptr(&paramTable[menuIndex]));
         oled.setCursor(0, 1);
-        strcpy_P(disp_buf, (char *)pgm_read_word(&paramTable[menuIndex]));
         oled.print(disp_buf);
     }
 
@@ -199,13 +200,14 @@ byte updateUserIF()
     byte reqResetDisp = 0;
 
     byte stateA = btnA.getState();
+    byte stateB = btnB.getState();
     // ボタン操作
     if (stateA == 2)
     {
         menuIndex = constrainCyclic(menuIndex - 1, 0, MENUMAX - 1);
         reqUpdateDisp = 1;
     }
-    if (btnB.getState() == 2)
+    if (stateB == 2)
     {
         menuIndex = constrainCyclic(menuIndex + 1, 0, MENUMAX - 1);
         reqUpdateDisp = 1;
@@ -241,6 +243,10 @@ byte updateUserIF()
             reqUpdateDisp = 1;
     }
 
+    // Serial.print(stateA);
+    // Serial.print(",");
+    // Serial.print(stateB);
+    // Serial.print(",");
     // Serial.print(enc[0]);
     // Serial.print(",");
     // Serial.print(enc[1]);
