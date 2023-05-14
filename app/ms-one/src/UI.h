@@ -1,4 +1,5 @@
 #pragma once
+#include <MozziGuts.h>
 #include <Tiny4kOLED_tiny-i2c.h> // 2.2.2 or later
 // #include <TinyI2CMaster.h>
 #include "RotaryEncoderMozzi.hpp"
@@ -12,39 +13,35 @@ extern UserParameters params;
 extern byte seqStart;
 extern byte seqChange;
 
-RotaryEncoderMozzi encA(A3, A2, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI,
-                   RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI);
-RotaryEncoderMozzi encB(A1, A0, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI,
-                   RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI);
-RotaryEncoderMozzi encC(15, 14, RotaryEncoderMozzi::InputPinMode::DIGITAL,
-                   RotaryEncoderMozzi::InputPinMode::DIGITAL);
-RotaryEncoderMozzi encD(16, A8, RotaryEncoderMozzi::InputPinMode::DIGITAL,
-                   RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI);
+static RotaryEncoderMozzi encA;
+static RotaryEncoderMozzi encB;
+static RotaryEncoder encC;
+static RotaryEncoder encD;
+static Button btnA;
+static Button btnB;
 
-ButtonMozzi btnA(A6, ButtonMozzi::InputPinMode::ANALOG_MOZZI);
-ButtonMozzi btnB(5, ButtonMozzi::InputPinMode::DIGITAL);
-
-byte userParamSave = 0;
-byte userParamLoad = 0;
-byte userParamLoadDef = 0;
-byte userConfigSave = 0;
-byte oledPow = 1;
+static byte isOLEDInit = 0;
+static byte userParamSave = 0;
+static byte userParamLoad = 0;
+static byte userParamLoadDef = 0;
+static byte userConfigSave = 0;
+static byte oledPow = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 操作・表示テーブル
 #define MENUMAX 10
 #define MENUCOL 4
-const char title10[] PROGMEM = "RandSequencer";
-const char title1[] PROGMEM = "Osc 1        ";
-const char title2[] PROGMEM = "Osc 2        ";
-const char title3[] PROGMEM = "Filter/OscSet";
-const char title4[] PROGMEM = "Filter Env   ";
-const char title5[] PROGMEM = "Amp Env      ";
-const char title6[] PROGMEM = "LFO          ";
-const char title7[] PROGMEM = "Chr/Frng/Gain";
-const char title9[] PROGMEM = "Config       ";
-const char title8[] PROGMEM = "DataSave/Load";
-const char *const titleTable[MENUMAX] PROGMEM =
+static const char title10[] PROGMEM = "RandSequencer";
+static const char title1[] PROGMEM = "Osc 1        ";
+static const char title2[] PROGMEM = "Osc 2        ";
+static const char title3[] PROGMEM = "Filter/OscSet";
+static const char title4[] PROGMEM = "Filter Env   ";
+static const char title5[] PROGMEM = "Amp Env      ";
+static const char title6[] PROGMEM = "LFO          ";
+static const char title7[] PROGMEM = "Chr/Frng/Gain";
+static const char title9[] PROGMEM = "Config       ";
+static const char title8[] PROGMEM = "DataSave/Load";
+static const char *const titleTable[MENUMAX] PROGMEM =
     {
         title10,
         title1,
@@ -58,17 +55,17 @@ const char *const titleTable[MENUMAX] PROGMEM =
         title8,
 };
 
-const char param10[] PROGMEM = "BPM  step chg  play";
-const char param1[] PROGMEM = "wave oct  semi tune";
-const char param2[] PROGMEM = "wave oct  semi tune";
-const char param3[] PROGMEM = "freq reso 1<>2 calb";
-const char param4[] PROGMEM = "attk dcay rels amnt";
-const char param5[] PROGMEM = "attk dcay rels amnt";
-const char param6[] PROGMEM = "rate >chr >osc >frq";
-const char param7[] PROGMEM = "f.bk time amnt driv";
-const char param9[] PROGMEM = "step disp c<>m save";
-const char param8[] PROGMEM = "slot save load dflt";
-const char *const paramTable[MENUMAX] PROGMEM =
+static const char param10[] PROGMEM = "BPM  step chg  play";
+static const char param1[] PROGMEM = "wave oct  semi tune";
+static const char param2[] PROGMEM = "wave oct  semi tune";
+static const char param3[] PROGMEM = "freq reso 1<>2 calb";
+static const char param4[] PROGMEM = "attk dcay rels amnt";
+static const char param5[] PROGMEM = "attk dcay rels amnt";
+static const char param6[] PROGMEM = "rate >chr >osc >frq";
+static const char param7[] PROGMEM = "f.bk time amnt driv";
+static const char param9[] PROGMEM = "step disp c<>m save";
+static const char param8[] PROGMEM = "slot save load dflt";
+static const char *const paramTable[MENUMAX] PROGMEM =
     {
         param10,
         param1,
@@ -82,20 +79,20 @@ const char *const paramTable[MENUMAX] PROGMEM =
         param8,
 };
 
-byte nullItem = 0;
-byte max_osc = OSC_MAX - 1;
-byte max_oct = MAX_OCT - 1;
-byte max_semi = MAX_SEMI - 1;
-byte max_8bit = 255;
-byte max_amnt = 8;
-byte max_tune = 10;
-byte max_save = 7;
-byte min_zero = 0;
-byte min_one = 1;
-byte max_two = 2;
-byte max_four = 4;
-byte max_4bit = 16;
-byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
+static byte nullItem = 0;
+static byte max_osc = OSC_MAX - 1;
+static byte max_oct = MAX_OCT - 1;
+static byte max_semi = MAX_SEMI - 1;
+static byte max_8bit = 255;
+static byte max_amnt = 8;
+static byte max_tune = 10;
+static byte max_save = 7;
+static byte min_zero = 0;
+static byte min_one = 1;
+static byte max_two = 2;
+static byte max_four = 4;
+static byte max_4bit = 16;
+static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
     {
         // min, max, step
         {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_4bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
@@ -110,7 +107,7 @@ byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
         {{&min_zero, &max_save, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
 };
 
-void *valueTable[MENUMAX][MENUCOL] =
+static void *valueTable[MENUMAX][MENUCOL] =
     {
         {&conf.seqBPM, &conf.seqMaxStep, &seqChange, &seqStart},
         {&params.osc01_wave, &params.osc01_oct, &params.osc01_semi, &params.osc01_detune},
@@ -145,6 +142,7 @@ void initOLED()
     oled.on();
     oled.clear();
     delay(100);
+    isOLEDInit = 1;
 }
 
 /// @brief 操作・表示テーブルの表示
@@ -173,6 +171,23 @@ void dispOLED(byte menuIndex)
     oled.print(disp_buf);
 }
 
+void initController()
+{
+    reconnectDigitalIn(A3);
+    reconnectDigitalIn(A2);
+    reconnectDigitalIn(A1);
+    reconnectDigitalIn(A0);
+    encA.init(A3, A2, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI);
+    encB.init(A1, A0, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI, RotaryEncoderMozzi::InputPinMode::ANALOG_MOZZI);
+    encC.init(15, 14);
+    encD.init(16, A8);
+    btnA.init(A6);
+    btnB.init(5);
+
+    btnA.setHoldTime(200);
+    btnB.setHoldTime(200);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief 範囲制限サイクリック版
 /// @tparam su
@@ -198,6 +213,9 @@ byte updateUserIF()
     static byte oledPowLast = 0;
     byte reqUpdateDisp = 0;
     byte reqResetDisp = 0;
+
+    if (!isOLEDInit)
+        return 0;
 
     byte stateA = btnA.getState();
     byte stateB = btnB.getState();

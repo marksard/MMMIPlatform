@@ -5,7 +5,7 @@
  * Tiny4kOLED 2.2.2 or later
  * MIDIUSB 1.0.5 or later
  * Copyright 2023 marksard
- */ 
+ */
 
 ///////////////////////////////////////////////////////////////////////////////
 // mozzi 1.1.0 or later
@@ -39,20 +39,22 @@ RecieveMidiUSB rmu;
 
 #define AMOUNT(value, amount, max) ((amount) == 0 ? 0 : ((value) >> ((max) - (amount))))
 
-Oscillator osc;
-Oscil<SIN256_NUM_CELLS, AUDIO_RATE> lfo01(SIN256_DATA);
-ADSR<CONTROL_RATE, CONTROL_RATE> envFlt;
-ADSR<CONTROL_RATE, CONTROL_RATE> envAmp;
-ResonantFilterEx<LOWPASS> lpf01;
-AudioDelayFeedback<DELAY_FEEDBACK_MEM, ALLPASS> chorus;
+static Oscillator osc;
+static Oscil<SIN256_NUM_CELLS, AUDIO_RATE> lfo01(SIN256_DATA);
+static ADSR<CONTROL_RATE, CONTROL_RATE> envFlt;
+static ADSR<CONTROL_RATE, CONTROL_RATE> envAmp;
+static ResonantFilterEx<LOWPASS> lpf01;
+static AudioDelayFeedback<DELAY_FEEDBACK_MEM, ALLPASS> chorus;
+static Overdrive overDrive;
+static Overdrive limitter;
+static AutoRandomSequencer rs;
+static byte envFltStep;
+static byte envAmpStep;
+static int8_t lfo01Step = 0;
+
 UserConfig conf;
 UserParameters params;
-Overdrive overDrive;
-Overdrive limitter;
-RandomSequencer rs;
-byte envFltStep;
-byte envAmpStep;
-int8_t lfo01Step = 0;
+
 byte seqStart = 0;
 byte seqChange = 1;
 
@@ -107,7 +109,7 @@ void recieveMIDI()
 {
 #ifdef USE_USB_MIDI
     rmu.update();
-    if(rmu.isNoteOn())
+    if (rmu.isNoteOn())
     {
         envFlt.noteOn();
         envAmp.noteOn();
@@ -181,7 +183,6 @@ void setup()
 {
     // Serial.begin(4800);
     initEEPROM();
-    initOLED();
     loadUserConfig(&conf);
     loadUserParameters(&params, conf.selectedSlot);
 
@@ -190,6 +191,9 @@ void setup()
     limitter.setParam(4, 2);    // ratio 16:1, threshold 8191
 
     startMozzi(CONTROL_RATE);
+
+    initOLED();
+    initController();
 }
 
 void updateControl()
@@ -272,8 +276,7 @@ AudioOutput_t updateAudio()
         // エフェクト音のみ
         sound = chorus.next(sound >> 8) << 8;
     }
-    else 
-    if (params.chorus_level > 0)
+    else if (params.chorus_level > 0)
     {
         sound = (sound + (chorus.next(sound >> 8) << params.chorus_level));
     }
