@@ -216,7 +216,11 @@ void updateControl()
     else
     {
         if (changed)
+        {
             rs.setBPM(conf.seqBPM);
+            rs.setChangeBar(conf.autoChangeBar);
+            rs.autoChanger(conf.autoChange);
+        }
         randomSequencer();
     }
 

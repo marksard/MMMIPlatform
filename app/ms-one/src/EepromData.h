@@ -19,7 +19,7 @@ void initEEPROM()
 }
 
 // 設定値系
-const static char *UI_VER = "ms01conf_001\0";
+const static char *UI_VER = "ms01conf_002\0";
 struct UserConfig
 {
     char ver[14];
@@ -29,10 +29,12 @@ struct UserConfig
     byte seqMaxStep;
     byte seqBPM;
     byte setVOctCalibration;
+    byte autoChange;
+    byte autoChangeBar;
 };
 
 // 操作系パラメータ現在値
-const static char *PARAM_VER = "ms01param001\0";
+const static char *PARAM_VER = "ms01param002\0";
 struct UserParameters
 {
     char ver[14];
@@ -87,6 +89,8 @@ void initUserConfig(UserConfig *pUserConfig)
     pUserConfig->seqMaxStep = 8;
     pUserConfig->seqBPM = 133;
     pUserConfig->setVOctCalibration = 100;
+    pUserConfig->autoChange = 0;
+    pUserConfig->autoChangeBar = 4;
 }
 
 void loadUserConfig(UserConfig *pUserConfig)
