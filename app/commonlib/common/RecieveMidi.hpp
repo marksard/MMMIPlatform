@@ -46,8 +46,8 @@ public:
         // if (midiInterface.getType() != midi::NoteOn)
         //     return false;
 
-        Serial.print("note on :");
-        Serial.println(midiInterface.getType());
+        // Serial.print("note on :");
+        // Serial.println(midiInterface.getType());
         // _lastNotesの状態を更新
         // _lastNotesの空きスペース(-1)に詰める
         for (int8_t i = 0; i < MAX_USBMIDI_NOTE; ++i)
@@ -70,8 +70,8 @@ public:
         // if (midiInterface.getType() != midi::NoteOff)
         //     return false;
 
-        Serial.print("note off :");
-        Serial.println(midiInterface.getType());
+        // Serial.print("note off :");
+        // Serial.println(midiInterface.getType());
 
         // _lastNotesの状態を更新
         // _lastNotesにノート情報がひとつでも残っていればfalseとする

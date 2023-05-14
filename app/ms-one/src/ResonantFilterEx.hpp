@@ -45,7 +45,7 @@ public:
         // 歪みすぎると聴く堪えないので内部データをリセットし前回のフィルター設定のまま鳴らす
         if (sound < -128 || sound > 127)
         {
-            Serial.println(last);
+            // Serial.println(last);
             reset();
             sound = last;
         }

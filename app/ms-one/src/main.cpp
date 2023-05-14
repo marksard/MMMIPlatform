@@ -200,7 +200,7 @@ void setup()
 void updateControl()
 {
     static byte lastInputOctVorMIDI = 255;
-    // ユーザー操作系の取得とOLED更新
+    // ユーザー操作系更新
     byte changed = updateUserIF();
 
     if (lastInputOctVorMIDI != conf.inputOctVorMIDI)

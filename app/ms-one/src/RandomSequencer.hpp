@@ -143,7 +143,8 @@ public:
     void autoChanger(byte on)
     {
         _changeStart = on;
-        _barCount = 0;
+        if (!on)
+            _barCount = 0;
     }
 
     void setChangeBar(byte changeBar)
@@ -153,14 +154,20 @@ public:
 
     bool ready() override
     {
+        bool result = RandomSequencer::ready();
+        if (!result) return false;
+
         if ((_barCount >> 4) >= _changeBar && _changeStart)
         {
             generate();
             _barCount = 0;
         }
+
+        // Serial.print(_changeBar);
+        // Serial.print(',');
         // Serial.println(_barCount);
 
-        return RandomSequencer::ready();
+        return result;
     }
 
     void next(byte endStep) override
@@ -171,7 +178,7 @@ public:
 
     void resetSeq() override
     {
-        _barCount = 0;        
+        _barCount = 0;
         RandomSequencer::resetSeq();
     }
 
