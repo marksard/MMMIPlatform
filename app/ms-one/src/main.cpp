@@ -272,7 +272,7 @@ AudioOutput_t updateAudio()
     if (!envAmpFree)
         sound = sound * envAmpStep;
     else
-        sound = sound << 8;
+        sound = sound << 7;
 
     // オーバードライブ
     sound = overDrive.next(sound);
