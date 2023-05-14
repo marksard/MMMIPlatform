@@ -23,6 +23,7 @@ public:
         _pin = pin;
         _pinState = 0;
         _holdStage = 0;
+        _holdTime = 500;
 
         pinMode(pin, INPUT_PULLUP);
     }
@@ -75,7 +76,7 @@ public:
                 _lastMillis = millis();
             }
             // Hold confirm (1sec)
-            else if (millis() >= _lastMillis + 500)
+            else if (millis() >= _lastMillis + _holdTime)
             {
                 _holdStage = 2;
             }
@@ -84,11 +85,17 @@ public:
         return result;
     }
 
+    void setHoldTime(int16_t mills)
+    {
+        _holdTime = mills;
+    }
+
 protected:
     byte _pin;
     byte _pinState;
     byte _holdStage;
     unsigned long _lastMillis;
+    int16_t _holdTime;
 
     /// @brief ピン値読込
     /// @return
