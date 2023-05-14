@@ -12,6 +12,7 @@ extern UserParameters params;
 
 extern byte seqStart;
 extern byte seqChange;
+extern byte envAmpFree;
 
 static RotaryEncoderMozzi encA;
 static RotaryEncoderMozzi encB;
@@ -58,7 +59,7 @@ static const char *const titleTable[MENUMAX] PROGMEM =
 };
 
 static const char param10[] PROGMEM = "BPM  step chg  play";
-static const char param11[] PROGMEM = "SET  bar ----  ----";
+static const char param11[] PROGMEM = "SET  bar ----  free";
 static const char param1[] PROGMEM = "wave oct  semi tune";
 static const char param2[] PROGMEM = "wave oct  semi tune";
 static const char param3[] PROGMEM = "freq reso 1<>2 calb";
@@ -100,7 +101,7 @@ static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
     {
         // min, max, step
         {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_4bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_zero, &min_zero, &min_zero}, {&min_zero, &min_zero, &min_zero}},
+        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_zero, &min_zero, &min_zero}, {&min_zero, &min_one, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_8bit, &min_one}},
@@ -115,7 +116,7 @@ static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
 static void *valueTable[MENUMAX][MENUCOL] =
     {
         {&conf.seqBPM, &conf.seqMaxStep, &seqChange, &seqStart},
-        {&conf.autoChange, &conf.autoChangeBar, &nullItem, &nullItem},
+        {&conf.autoChange, &conf.autoChangeBar, &nullItem, &envAmpFree},
         {&params.osc01_wave, &params.osc01_oct, &params.osc01_semi, &params.osc01_detune},
         {&params.osc02_wave, &params.osc02_oct, &params.osc02_semi, &params.osc02_detune},
         {&params.flt_Freq, &params.flt_Reso, &params.osc01_vol, &conf.setVOctCalibration},

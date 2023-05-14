@@ -57,6 +57,7 @@ UserParameters params;
 
 byte seqStart = 0;
 byte seqChange = 1;
+byte envAmpFree = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief エンベロープの設定(Sustain省略版)
@@ -268,7 +269,11 @@ AudioOutput_t updateAudio()
     // ローパスフィルター(int8_t)
     sound = lpf01.nextSafe(sound);
     // アンプエンベロープをかける（int8_t -> int16_tに拡大）
-    sound = sound * envAmpStep;
+    if (!envAmpFree)
+        sound = sound * envAmpStep;
+    else
+        sound = sound << 8;
+
     // オーバードライブ
     sound = overDrive.next(sound);
     // 5-8はちょっと増幅しとく
