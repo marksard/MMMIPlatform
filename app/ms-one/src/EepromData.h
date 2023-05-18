@@ -35,7 +35,7 @@ struct UserConfig
 
 // 操作系パラメータ現在値
 const static char *PARAM_VER = "ms01param002\0";
-struct UserParameters
+struct SynthPatch
 {
     char ver[14];
     byte osc01_wave;
@@ -77,7 +77,7 @@ struct UserParameters
 
 // EEPROM格納順番
 int startUserConfigAddress = 0;
-int startUserParametersAddress = sizeof(UserConfig);
+int startSynthPatchAddress = sizeof(UserConfig);
 
 ///////////////////////////////////////////////////////////////////////////////
 void initUserConfig(UserConfig *pUserConfig)
@@ -119,73 +119,73 @@ void saveSelectedSlot(byte selectedSlot)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void initUserParameters(UserParameters *pParams)
+void initSynthPatch(SynthPatch *pPatch)
 {
-    strcpy(pParams->ver, PARAM_VER);
-    pParams->osc01_wave = 0;
-    pParams->osc01_oct = 1;
-    pParams->osc01_semi = 0;
-    pParams->osc01_detune = 0;
-    pParams->osc01_vol = 4; // osc1/2のバランスで使用
+    strcpy(pPatch->ver, PARAM_VER);
+    pPatch->osc01_wave = 0;
+    pPatch->osc01_oct = 1;
+    pPatch->osc01_semi = 0;
+    pPatch->osc01_detune = 0;
+    pPatch->osc01_vol = 4; // osc1/2のバランスで使用
 
-    pParams->osc02_wave = 0;
-    pParams->osc02_oct = 2;
-    pParams->osc02_semi = 0;
-    pParams->osc02_detune = 3;
-    pParams->osc02_vol = 0; // 未使用
+    pPatch->osc02_wave = 0;
+    pPatch->osc02_oct = 2;
+    pPatch->osc02_semi = 0;
+    pPatch->osc02_detune = 3;
+    pPatch->osc02_vol = 0; // 未使用
 
-    pParams->envFlt_attack = 0;
-    pParams->envFlt_decay = 80;
-    pParams->envFlt_release = 44;
-    pParams->envFlt_amount = 7;
+    pPatch->envFlt_attack = 0;
+    pPatch->envFlt_decay = 80;
+    pPatch->envFlt_release = 44;
+    pPatch->envFlt_amount = 7;
 
-    pParams->envAmp_attack = 0;
-    pParams->envAmp_decay = 47;
-    pParams->envAmp_release = 60;
-    pParams->envAmp_amount = 8;
+    pPatch->envAmp_attack = 0;
+    pPatch->envAmp_decay = 47;
+    pPatch->envAmp_release = 60;
+    pPatch->envAmp_amount = 8;
 
-    pParams->lfo01_freq = 1;
-    pParams->lfo01_amt_chorus = 0;
-    pParams->lfo01_amt_osc02 = 0;
-    pParams->lfo01_amt_ffreq = 8;
+    pPatch->lfo01_freq = 1;
+    pPatch->lfo01_amt_chorus = 0;
+    pPatch->lfo01_amt_osc02 = 0;
+    pPatch->lfo01_amt_ffreq = 8;
 
-    pParams->flt_Freq = 47;
-    pParams->flt_Reso = 240;
+    pPatch->flt_Freq = 47;
+    pPatch->flt_Reso = 240;
 
-    pParams->chorus_feedback = 127;
-    pParams->chorus_time = 127;
-    pParams->chorus_level = 7;
+    pPatch->chorus_feedback = 127;
+    pPatch->chorus_time = 127;
+    pPatch->chorus_level = 7;
 
-    pParams->driveLevel = 0;
+    pPatch->driveLevel = 0;
 }
 
-void loadUserParameters(UserParameters *pParams, int selectSlot)
+void loadSynthPatch(SynthPatch *pPatch, int selectSlot)
 {
     if (selectSlot == -1)
     {
-        initUserParameters(pParams);
+        initSynthPatch(pPatch);
         return;
     }
 
-    EEPROM.get<UserParameters>(startUserParametersAddress +
-                                   (sizeof(UserParameters) * selectSlot),
-                               *pParams);
-    if (strcmp(pParams->ver, PARAM_VER))
+    EEPROM.get<SynthPatch>(startSynthPatchAddress +
+                                   (sizeof(SynthPatch) * selectSlot),
+                               *pPatch);
+    if (strcmp(pPatch->ver, PARAM_VER))
     {
-        initUserParameters(pParams);
+        initSynthPatch(pPatch);
     }
 }
 
-void saveUserParameters(UserParameters *pParams, int selectSlot)
+void saveSynthPatch(SynthPatch *pPatch, int selectSlot)
 {
     if (selectSlot == -1)
     {
         return;
     }
 
-    EEPROM.put<UserParameters>(startUserParametersAddress +
-                                   (sizeof(UserParameters) * selectSlot),
-                               *pParams);
+    EEPROM.put<SynthPatch>(startSynthPatchAddress +
+                                   (sizeof(SynthPatch) * selectSlot),
+                               *pPatch);
 #if defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_MBED)
     EEPROM.commit();
 #endif

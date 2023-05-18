@@ -53,7 +53,7 @@ static byte envAmpStep;
 static int8_t lfo01Step = 0;
 
 UserConfig conf;
-UserParameters params;
+SynthPatch patch;
 
 byte seqStart = 0;
 byte seqChange = 1;
@@ -98,9 +98,9 @@ void recieveGateCV()
 
     // CV入力
     int vOct = mozziAnalogRead(VOCT_PIN);
-    osc.setFreqFromVOct(Oscillator::Select::OSC01, vOct, params.osc01_oct, params.osc01_semi, params.osc01_detune);
-    int add = params.osc02_detune + AMOUNT((int)lfo01Step, params.lfo01_amt_osc02, 8);
-    osc.setFreqFromVOct(Oscillator::Select::OSC02, vOct, params.osc02_oct, params.osc02_semi, add);
+    osc.setFreqFromVOct(Oscillator::Select::OSC01, vOct, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
+    int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
+    osc.setFreqFromVOct(Oscillator::Select::OSC02, vOct, patch.osc02_oct, patch.osc02_semi, add);
 }
 
 // #define RX_LED 17
@@ -123,9 +123,9 @@ void recieveMIDI()
         digitalWrite(GATE_PIN, LOW);
     }
     byte lastNote = rmu.getNote();
-    osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, params.osc01_oct, params.osc01_semi, params.osc01_detune);
-    int add = params.osc02_detune + AMOUNT((int)lfo01Step, params.lfo01_amt_osc02, 8);
-    osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, params.osc02_oct, params.osc02_semi, add);
+    osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
+    int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
+    osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, patch.osc02_oct, patch.osc02_semi, add);
 #endif
 }
 
@@ -173,9 +173,9 @@ void randomSequencer()
         rs.next(conf.seqMaxStep);
     }
 
-    osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, params.osc01_oct, params.osc01_semi, params.osc01_detune);
-    int add = params.osc02_detune + AMOUNT((int)lfo01Step, params.lfo01_amt_osc02, 8);
-    osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, params.osc02_oct, params.osc02_semi, add);
+    osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
+    int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
+    osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, patch.osc02_oct, patch.osc02_semi, add);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ void setup()
     // Serial.begin(4800);
     initEEPROM();
     loadUserConfig(&conf);
-    loadUserParameters(&params, conf.selectedSlot);
+    loadSynthPatch(&patch, conf.selectedSlot);
 
     rs.setBPM(conf.seqBPM);
     rs.start();
@@ -229,35 +229,35 @@ void updateControl()
     if (changed)
     {
         osc.setVOctCalibration(conf.setVOctCalibration);
-        osc.setBalance(params.osc01_vol);
-        osc.setWave(Oscillator::Select::OSC01, (Oscillator::Wave)params.osc01_wave);
-        osc.setWave(Oscillator::Select::OSC02, (Oscillator::Wave)params.osc02_wave);
+        osc.setBalance(patch.osc01_vol);
+        osc.setWave(Oscillator::Select::OSC01, (Oscillator::Wave)patch.osc01_wave);
+        osc.setWave(Oscillator::Select::OSC02, (Oscillator::Wave)patch.osc02_wave);
 
         // パラメータ更新
-        envSetADR(&envFlt, params.envFlt_attack, params.envFlt_decay, params.envFlt_release);
-        envSetADR(&envAmp, params.envAmp_attack, params.envAmp_decay, params.envAmp_release);
-        lfo01.setFreq((float)(params.lfo01_freq * 0.05));
+        envSetADR(&envFlt, patch.envFlt_attack, patch.envFlt_decay, patch.envFlt_release);
+        envSetADR(&envAmp, patch.envAmp_attack, patch.envAmp_decay, patch.envAmp_release);
+        lfo01.setFreq((float)(patch.lfo01_freq * 0.05));
 
-        chorus.setFeedbackLevel(params.chorus_feedback - 128);
+        chorus.setFeedbackLevel(patch.chorus_feedback - 128);
 
-        overDrive.setParam(params.driveLevel, params.driveLevel);
+        overDrive.setParam(patch.driveLevel, patch.driveLevel);
     }
 
     // コーラス情報更新
-    uint16_t time_amt = constrain(params.chorus_time + AMOUNT(lfo01Step, params.lfo01_amt_chorus, 8), 0, 255);
+    uint16_t time_amt = constrain(patch.chorus_time + AMOUNT(lfo01Step, patch.lfo01_amt_chorus, 8), 0, 255);
     time_amt = (time_amt << 8) + time_amt; // 8bit持ち上げるだけじゃなく、足してあげないと良い感じにならんので…
     chorus.setDelayTimeCells(time_amt);
 
     // エンベロープ情報更新
     envFlt.update();
     envAmp.update();
-    envFltStep = AMOUNT(envFlt.next(), params.envFlt_amount, 8);
-    envAmpStep = AMOUNT(envAmp.next(), params.envAmp_amount, 8);
+    envFltStep = AMOUNT(envFlt.next(), patch.envFlt_amount, 8);
+    envAmpStep = AMOUNT(envAmp.next(), patch.envAmp_amount, 8);
 
     // フィルター情報更新
-    int freq = min(params.flt_Freq + envFltStep, 255);
-    freq = constrain(freq + AMOUNT((int)lfo01Step, params.lfo01_amt_ffreq, 8), 0, 255);
-    lpf01.setCutoffFreqAndResonance(freq, params.flt_Reso);
+    int freq = min(patch.flt_Freq + envFltStep, 255);
+    freq = constrain(freq + AMOUNT((int)lfo01Step, patch.lfo01_amt_ffreq, 8), 0, 255);
+    lpf01.setCutoffFreqAndResonance(freq, patch.flt_Reso);
 }
 
 AudioOutput_t updateAudio()
@@ -277,24 +277,24 @@ AudioOutput_t updateAudio()
     // オーバードライブ
     sound = overDrive.next(sound);
     // 5-8はちょっと増幅しとく
-    sound = sound << (params.driveLevel > 4 ? params.driveLevel >> 1 : 0);
+    sound = sound << (patch.driveLevel > 4 ? patch.driveLevel >> 1 : 0);
 
     // コーラス・フランジャー(入力はint8_tなので8bitシフトして、任意の大きさに戻す)
-    if (params.chorus_level == 8)
+    if (patch.chorus_level == 8)
     {
         // エフェクト音のみ
         sound = chorus.next(sound >> 8) << 8;
     }
-    else if (params.chorus_level > 0)
+    else if (patch.chorus_level > 0)
     {
-        sound = (sound + (chorus.next(sound >> 8) << params.chorus_level));
+        sound = (sound + (chorus.next(sound >> 8) << patch.chorus_level));
     }
 
     // リミッター
     sound = limitter.next(sound);
 
     // 最終的にかなり目減りする設定では上げる
-    byte bit = params.driveLevel == 4 || params.driveLevel > 6 ? 13 : 14;
+    byte bit = patch.driveLevel == 4 || patch.driveLevel > 6 ? 13 : 14;
     return MonoOutput::fromAlmostNBit(bit, sound).clip();
 }
 

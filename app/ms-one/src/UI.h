@@ -8,7 +8,7 @@
 #include "../../commonlib/soundlogic/OscillatorTables.h"
 
 extern UserConfig conf;
-extern UserParameters params;
+extern SynthPatch patch;
 
 extern byte seqStart;
 extern byte seqChange;
@@ -117,13 +117,13 @@ static void *valueTable[MENUMAX][MENUCOL] =
     {
         {&conf.seqBPM, &conf.seqMaxStep, &seqChange, &seqStart},
         {&conf.autoChange, &conf.autoChangeBar, &nullItem, &envAmpFree},
-        {&params.osc01_wave, &params.osc01_oct, &params.osc01_semi, &params.osc01_detune},
-        {&params.osc02_wave, &params.osc02_oct, &params.osc02_semi, &params.osc02_detune},
-        {&params.flt_Freq, &params.flt_Reso, &params.osc01_vol, &conf.setVOctCalibration},
-        {&params.envFlt_attack, &params.envFlt_decay, &params.envFlt_release, &params.envFlt_amount},
-        {&params.envAmp_attack, &params.envAmp_decay, &params.envAmp_release, &params.envAmp_amount},
-        {&params.lfo01_freq, &params.lfo01_amt_chorus, &params.lfo01_amt_osc02, &params.lfo01_amt_ffreq},
-        {&params.chorus_feedback, &params.chorus_time, &params.chorus_level, &params.driveLevel},
+        {&patch.osc01_wave, &patch.osc01_oct, &patch.osc01_semi, &patch.osc01_detune},
+        {&patch.osc02_wave, &patch.osc02_oct, &patch.osc02_semi, &patch.osc02_detune},
+        {&patch.flt_Freq, &patch.flt_Reso, &patch.osc01_vol, &conf.setVOctCalibration},
+        {&patch.envFlt_attack, &patch.envFlt_decay, &patch.envFlt_release, &patch.envFlt_amount},
+        {&patch.envAmp_attack, &patch.envAmp_decay, &patch.envAmp_release, &patch.envAmp_amount},
+        {&patch.lfo01_freq, &patch.lfo01_amt_chorus, &patch.lfo01_amt_osc02, &patch.lfo01_amt_ffreq},
+        {&patch.chorus_feedback, &patch.chorus_time, &patch.chorus_level, &patch.driveLevel},
         {&conf.paramStep, &oledPow, &conf.inputOctVorMIDI, &userConfigSave},
         {&conf.selectedSlot, &userParamSave, &userParamLoad, &userParamLoadDef},
 };
@@ -284,7 +284,7 @@ byte updateUserIF()
     if (userParamLoadDef == 1)
     {
         userParamLoadDef = 0;
-        initUserParameters(&params);
+        initSynthPatch(&patch);
         initUserConfig(&conf);
         saveUserConfig(&conf);
         reqResetDisp = 1;
@@ -292,14 +292,14 @@ byte updateUserIF()
     else if (userParamLoad == 1)
     {
         userParamLoad = 0;
-        loadUserParameters(&params, conf.selectedSlot);
+        loadSynthPatch(&patch, conf.selectedSlot);
         saveSelectedSlot(conf.selectedSlot);
         reqResetDisp = 1;
     }
     else if (userParamSave == 1)
     {
         userParamSave = 0;
-        saveUserParameters(&params, conf.selectedSlot);
+        saveSynthPatch(&patch, conf.selectedSlot);
         saveSelectedSlot(conf.selectedSlot);
         reqResetDisp = 1;
     }
