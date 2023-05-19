@@ -22,10 +22,15 @@ public:
         _lastOnNote = 0;
     }
 
+    void setup()
+    {
+    }
+
     /// @brief MIDI読み取り
-    void update()
+    bool ready()
     {
         _rx = MidiUSB.read();
+        return true;
     }
 
     /// @brief ノートオンしたかどうか

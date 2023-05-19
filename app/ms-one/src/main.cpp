@@ -15,8 +15,10 @@
 
 // #define USE_USB_MIDI
 #ifdef USE_USB_MIDI
-#include "../../commonlib/common/RecieveMidiUSB.hpp"
-RecieveMidiUSB rmu;
+// #include "../../commonlib/common/RecieveMidiUSB.hpp"
+// RecieveMidiUSB rmu;
+#include "../../commonlib/common/RecieveMidi.hpp"
+RecieveMidi rmu;
 #define DELAY_FEEDBACK_MEM 128
 #else
 #define DELAY_FEEDBACK_MEM 256
@@ -109,19 +111,22 @@ void recieveGateCV()
 void recieveMIDI()
 {
 #ifdef USE_USB_MIDI
-    rmu.update();
-    if (rmu.isNoteOn())
+    if (rmu.ready())
     {
-        envFlt.noteOn();
-        envAmp.noteOn();
-        digitalWrite(GATE_PIN, HIGH);
+        if (rmu.isNoteOn())
+        {
+            envFlt.noteOn();
+            envAmp.noteOn();
+            // digitalWrite(GATE_PIN, HIGH);
+        }
+        if (rmu.isNoteOff())
+        {
+            envFlt.noteOff();
+            envAmp.noteOff();
+            // digitalWrite(GATE_PIN, LOW);
+        }
     }
-    if (rmu.isNoteOff())
-    {
-        envFlt.noteOff();
-        envAmp.noteOff();
-        digitalWrite(GATE_PIN, LOW);
-    }
+
     byte lastNote = rmu.getNote();
     osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
     int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
@@ -195,6 +200,10 @@ void setup()
 
     initOLED();
     initController();
+
+#ifdef USE_USB_MIDI
+    rmu.setup();
+#endif
 }
 
 void updateControl()

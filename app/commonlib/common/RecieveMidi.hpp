@@ -33,21 +33,21 @@ public:
     }
 
     /// @brief MIDI読み取り
-    void update()
+    bool ready()
     {
+        return midiInterface.read();
     }
 
     /// @brief ノートオンしたかどうか
     /// @return true: note on
     bool isNoteOn()
     {
-        if (!midiInterface.read())
+        if (midiInterface.getType() != midi::NoteOn)
             return false;
-        // if (midiInterface.getType() != midi::NoteOn)
-        //     return false;
 
         // Serial.print("note on :");
         // Serial.println(midiInterface.getType());
+
         // _lastNotesの状態を更新
         // _lastNotesの空きスペース(-1)に詰める
         for (int8_t i = 0; i < MAX_USBMIDI_NOTE; ++i)
@@ -65,10 +65,8 @@ public:
     /// @return true: note off
     bool isNoteOff()
     {
-        if (!midiInterface.read())
+        if (midiInterface.getType() != midi::NoteOff)
             return false;
-        // if (midiInterface.getType() != midi::NoteOff)
-        //     return false;
 
         // Serial.print("note off :");
         // Serial.println(midiInterface.getType());
