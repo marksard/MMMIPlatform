@@ -240,7 +240,7 @@ void updateControl()
     if (lastInputOctVorMIDI != conf.inputOctVorMIDI)
     {
         lastInputOctVorMIDI = conf.inputOctVorMIDI;
-        pinMode(GATE_PIN, lastInputOctVorMIDI == 0 ? INPUT_PULLUP : OUTPUT);
+        pinMode(GATE_PIN, lastInputOctVorMIDI == 0 ? INPUT : OUTPUT);
     }
 
     // 入力端子、MIDI、シーケンサーからの入力受付、エンベロープとオシレータ周波数の更新

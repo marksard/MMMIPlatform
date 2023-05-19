@@ -66,7 +66,7 @@ public:
     void init()
     {
         _vOctCalibration = 100.0;
-        _slideTime = 1;
+        _slideTime = 0;
         _osc01Saw.setTable(PHASOR256_DATA);
         _osc02Saw.setTable(PHASOR256_DATA);
         _osc01Sw2.setTable(ACIDSAW_C_DATA);
@@ -114,11 +114,15 @@ public:
     void setFreq_Q16n16(Select osc, byte midiNote, byte oct, byte semi, int16_t add)
     {
         Q16n16 note = Q16n16_mtof(Q8n0_to_Q16n16(((oct + 1) * 12) + semi + midiNote));
-        _oscValues[(int)osc]._line.set(note, _slideTime);
-        Q16n16 nextNote = _oscValues[(int)osc]._line.next();
-        note = nextNote > note ? 
-                            max(nextNote, note) : 
-                            min(nextNote, note);
+
+        if (_slideTime > 0)
+        {
+            _oscValues[(int)osc]._line.set(note, _slideTime);
+            Q16n16 nextNote = _oscValues[(int)osc]._line.next();
+            note = nextNote > note ? 
+                                max(nextNote, note) : 
+                                min(nextNote, note);
+        }
 
         int wave = _oscValues[(int)osc]._wave;
         waveTable[(int)osc][wave]->setFreq_Q16n16(note + Q15n0_to_Q15n16(add));

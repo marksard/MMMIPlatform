@@ -158,7 +158,7 @@ void initSynthPatch(SynthPatch *pPatch)
     pPatch->chorus_level = 7;
 
     pPatch->driveLevel = 0;
-    pPatch->slideTime = 1;
+    pPatch->slideTime = 0;
 }
 
 void loadSynthPatch(SynthPatch *pPatch, int selectSlot)

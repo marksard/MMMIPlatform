@@ -83,7 +83,7 @@ static const char *const paramTable[MENUMAX] PROGMEM =
         param8,
 };
 
-static byte nullItem = 0;
+// static byte nullItem = 0;
 static byte max_osc = OSC_MAX - 1;
 static byte max_oct = MAX_OCT - 1;
 static byte max_semi = MAX_SEMI - 1;
@@ -100,7 +100,7 @@ static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
     {
         // min, max, step
         {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_5bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_one, &max_8bit, &conf.paramStep}, {&min_zero, &min_one, &min_one}},
+        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_zero, &max_5bit, &min_one}, {&min_zero, &min_one, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_8bit, &min_one}},
