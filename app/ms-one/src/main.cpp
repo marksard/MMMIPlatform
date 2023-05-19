@@ -142,7 +142,7 @@ void recieveMIDI()
         }
     }
 
-    byte lastNote = rmu.getNote();
+    byte lastNote = rmu.getNote() - 24;
     osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
     int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
     osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, patch.osc02_oct, patch.osc02_semi, add);
