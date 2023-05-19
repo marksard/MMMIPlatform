@@ -9,7 +9,6 @@
 
 extern UserConfig conf;
 extern SynthPatch patch;
-
 extern byte seqStart;
 extern byte seqChange;
 extern byte envAmpFree;
@@ -32,7 +31,7 @@ static byte oledPow = 1;
 // 操作・表示テーブル
 #define MENUMAX 11
 #define MENUCOL 4
-static const char title10[] PROGMEM = "RandSequencer";
+static const char title10[] PROGMEM = "SeqGenerator ";
 static const char title11[] PROGMEM = "SeqAutoChange";
 static const char title1[] PROGMEM = "Osc 1        ";
 static const char title2[] PROGMEM = "Osc 2        ";
@@ -59,7 +58,7 @@ static const char *const titleTable[MENUMAX] PROGMEM =
 };
 
 static const char param10[] PROGMEM = "BPM  step chg  play";
-static const char param11[] PROGMEM = "SET  bar ----  free";
+static const char param11[] PROGMEM = "SET  bar slid  free";
 static const char param1[] PROGMEM = "wave oct  semi tune";
 static const char param2[] PROGMEM = "wave oct  semi tune";
 static const char param3[] PROGMEM = "freq reso 1<>2 calb";
@@ -96,12 +95,12 @@ static byte min_zero = 0;
 static byte min_one = 1;
 static byte max_two = 2;
 // static byte max_four = 4;
-static byte max_4bit = 16;
+static byte max_5bit = 32;
 static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
     {
         // min, max, step
-        {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_4bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_zero, &min_zero, &min_zero}, {&min_zero, &min_one, &min_one}},
+        {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_5bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
+        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_one, &max_8bit, &conf.paramStep}, {&min_zero, &min_one, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
         {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_8bit, &min_one}},
@@ -116,7 +115,7 @@ static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
 static void *valueTable[MENUMAX][MENUCOL] =
     {
         {&conf.seqBPM, &conf.seqMaxStep, &seqChange, &seqStart},
-        {&conf.autoChange, &conf.autoChangeBar, &nullItem, &envAmpFree},
+        {&conf.autoChange, &conf.autoChangeBar, &patch.slideTime, &envAmpFree},
         {&patch.osc01_wave, &patch.osc01_oct, &patch.osc01_semi, &patch.osc01_detune},
         {&patch.osc02_wave, &patch.osc02_oct, &patch.osc02_semi, &patch.osc02_detune},
         {&patch.flt_Freq, &patch.flt_Reso, &patch.osc01_vol, &conf.setVOctCalibration},

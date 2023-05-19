@@ -73,6 +73,7 @@ struct SynthPatch
     byte chorus_level;
 
     byte driveLevel;
+    byte slideTime;
 };
 
 // EEPROM格納順番
@@ -157,6 +158,7 @@ void initSynthPatch(SynthPatch *pPatch)
     pPatch->chorus_level = 7;
 
     pPatch->driveLevel = 0;
+    pPatch->slideTime = 1;
 }
 
 void loadSynthPatch(SynthPatch *pPatch, int selectSlot)

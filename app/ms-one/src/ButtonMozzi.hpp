@@ -22,6 +22,8 @@ public:
         ANALOG_MOZZI,
     };
 
+    ButtonMozzi():Button() {}
+
     ButtonMozzi(byte pin, InputPinMode pinMode_)
     {
         init(pin, pinMode_);
