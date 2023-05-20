@@ -132,13 +132,11 @@ void recieveMIDI()
         {
             envFlt.noteOn();
             envAmp.noteOn();
-            // digitalWrite(GATE_PIN, HIGH);
         }
         if (rmu.isNoteOff())
         {
             envFlt.noteOff();
             envAmp.noteOff();
-            // digitalWrite(GATE_PIN, LOW);
         }
     }
 

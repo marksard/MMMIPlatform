@@ -93,11 +93,9 @@ public:
         // V/Octは1V上がるごとに1Octave
         // 基準周波数 * pow(2, 電圧)
         int freq = _oscValues[(int)osc]._octSemiValue *
-                       (float)pow(2, map(vOct, 0, 1024, 0, DAC_MAX_MILLVOLT) * 0.001) * _vOctCalibration +
-                   add;
-        freq = constrain(freq, 0, 32767);
+                       (float)pow(2, map(vOct, 0, 1024, 0, DAC_MAX_MILLVOLT) * 0.001) * _vOctCalibration;
         int wave = _oscValues[(int)osc]._wave;
-        waveTable[(int)osc][wave]->setFreq(freq);
+        waveTable[(int)osc][wave]->setFreq((int)freq + add);
     }
 
     void setFreqFromVOct(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
@@ -106,9 +104,10 @@ public:
         float freq = _oscValues[(int)osc]._octSemiValue *
                        pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration;
 
-        Q16n16 note = float_to_Q16n16(freq);
         int wave = _oscValues[(int)osc]._wave;
-        waveTable[(int)osc][wave]->setFreq_Q16n16(note + Q15n0_to_Q15n16(add));
+        waveTable[(int)osc][wave]->setFreq((int)freq + add);
+        // Q16n16 note = float_to_Q16n16(freq);
+        // waveTable[(int)osc][wave]->setFreq_Q16n16(note + Q15n0_to_Q15n16(add));
     }
 
     void setFreq_Q16n16(Select osc, byte midiNote, byte oct, byte semi, int16_t add)
