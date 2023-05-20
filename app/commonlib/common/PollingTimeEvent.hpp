@@ -36,7 +36,7 @@ public:
         if (!_start) return false;
 
         uint32_t now = millis();
-        if (now - _lastMillis >= triggerTime)
+        if ((int)(now - _lastMillis) >= triggerTime)
         {
             // Serial.print(_lastMillis);
             // Serial.print(",");
