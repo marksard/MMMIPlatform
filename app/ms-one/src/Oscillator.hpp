@@ -103,12 +103,12 @@ public:
     void setFreqFromVOct(Select osc, int16_t vOct, byte oct, byte semi, int16_t add)
     {
         updateOctSemiValue(osc, oct, semi);
-        int freq = _oscValues[(int)osc]._octSemiValue *
-                       pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration +
-                   add;
-        freq = constrain(freq, 0, 32767);
+        float freq = _oscValues[(int)osc]._octSemiValue *
+                       pgm_read_float(&volt_table_pow2[vOct]) * _vOctCalibration;
+
+        Q16n16 note = float_to_Q16n16(freq);
         int wave = _oscValues[(int)osc]._wave;
-        waveTable[(int)osc][wave]->setFreq(freq);
+        waveTable[(int)osc][wave]->setFreq_Q16n16(note + Q15n0_to_Q15n16(add));
     }
 
     void setFreq_Q16n16(Select osc, byte midiNote, byte oct, byte semi, int16_t add)
