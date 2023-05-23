@@ -9,7 +9,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "../../commonlib/common/PollingTimeEvent.hpp"
+#include "../../commonlib/common/TriggerInterface.hpp"
 
 #define MAX_SEQ 32
 #define MAX_TIMINGS 4
@@ -94,21 +94,35 @@ const byte accMap[MAX_TIMINGS][MAX_SEQ] PROGMEM = {
 class SequenceGenerator
 {
 public:
-    SequenceGenerator()
+    SequenceGenerator(TriggerInterface *pTrigger)
     {
+        _pTrigger = pTrigger;
     }
 
     /// @brief EventDelayに同じ
     /// @return
     virtual bool ready()
     {
-        return _pte.ready();
+        bool result = _pTrigger->ready();
+        if (result)
+        {
+            // Serial.println("trigger");
+            // Serial.println(_seqIndex);
+        }
+
+        return result;
     }
 
     /// @brief EventDelayに同じ
     void start()
     {
-        _pte.start();
+        _pTrigger->start();
+    }
+
+    /// @brief EventDelayに同じ
+    void stop()
+    {
+        _pTrigger->stop();
     }
 
     /// @brief 次のステップに遷移
@@ -118,7 +132,8 @@ public:
                             (_endStep > MAX_SEQ ? MAX_SEQ : _endStep)
                         ? 0
                         : (_seqIndex + 1);
-        // _pte.start();
+        // Serial.println(_seqIndex);
+        // _pTrigger->start();
     }
 
     /// @brief シーケンスリセット
@@ -126,7 +141,7 @@ public:
     virtual void resetSeq()
     {
         _seqIndex = 0;
-        _pte.start();
+        _pTrigger->start();
     }
 
     /// @brief ノートオン状態
@@ -162,7 +177,7 @@ public:
     void setBPM(byte bpm)
     {
         /// 解像度：16ビート
-        _pte.setBPM(bpm, 4);
+        _pTrigger->setBPM(bpm, 4);
     }
 
     /// @brief 終了ステップ
@@ -217,21 +232,21 @@ public:
             }
         }
 
-        for (byte i = 0; i < MAX_SEQ; ++i)
-        {
-            Serial.print(_gate[i]);
-        }
-        Serial.print("   ");
-        for (byte i = 0; i < MAX_SEQ; ++i)
-        {
-            Serial.print(_note[i]);
-            Serial.print(", ");
-        }
-        Serial.println("");
+        // for (byte i = 0; i < MAX_SEQ; ++i)
+        // {
+        //     Serial.print(_gate[i]);
+        // }
+        // Serial.print("   ");
+        // for (byte i = 0; i < MAX_SEQ; ++i)
+        // {
+        //     Serial.print(_note[i]);
+        //     Serial.print(", ");
+        // }
+        // Serial.println("");
     }
 
 private:
-    PollingTimeEvent _pte;
+    TriggerInterface *_pTrigger;
     byte _seqIndex = 0;
     byte _endStep = 0;
     byte _note[MAX_SEQ] = {0};
@@ -242,7 +257,7 @@ private:
 class SequenceAutoChanger : public SequenceGenerator
 {
 public:
-    SequenceAutoChanger() : SequenceGenerator()
+    SequenceAutoChanger(TriggerInterface *pTrigger) : SequenceGenerator(pTrigger)
     {
         _changeBar = 16;
         _changeStart = 0;

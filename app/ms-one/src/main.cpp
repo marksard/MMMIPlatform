@@ -13,7 +13,7 @@
 // #include <mozzi_config.h>
 // #define AUDIO_MODE HIFI
 
-#define USE_USB_MIDI
+// #define USE_USB_MIDI
 #ifdef USE_USB_MIDI
 // #include "../../commonlib/common/RecieveMidiUSB.hpp"
 // RecieveMidiUSB rmu;
@@ -24,10 +24,9 @@ RecieveMidi rmu;
 #define DELAY_FEEDBACK_MEM 256
 #endif
 
-#include <mozzi_midi.h>
-
 #define CONTROL_RATE 512
 #include <MozziGuts.h>
+#include <mozzi_midi.h>
 #include <Oscil.h>
 #include <tables/sin256_int8.h>
 #include <ADSR.h>
@@ -36,10 +35,15 @@ RecieveMidi rmu;
 #include "Oscillator.hpp"
 #include "../../commonlib/soundlogic/Overdrive.hpp"
 #include "EEPROMData.h"
+#include "../../commonlib/common/SyncInTrigger.hpp"
+#include "../../commonlib/common/PollingTimeEvent.hpp"
 #include "../../commonlib/common/SequenceGenerator.hpp"
 #include "UI.h"
 
 #define AMOUNT(value, amount, max) ((amount) == 0 ? 0 : ((value) >> ((max) - (amount))))
+
+#define GATE_PIN 7
+#define VOCT_PIN A7
 
 static Oscillator osc;
 static Oscil<SIN256_NUM_CELLS, AUDIO_RATE> lfo01(SIN256_DATA);
@@ -50,7 +54,9 @@ static ResonantFilterEx<LOWPASS> lpf01;
 static AudioDelayFeedback<DELAY_FEEDBACK_MEM, ALLPASS> chorus;
 static Overdrive overDrive;
 static Overdrive limitter;
-static SequenceAutoChanger seqGen;
+static PollingTimeEvent sit;
+// static SyncInTrigger sit(GATE_PIN);
+static SequenceAutoChanger seqGen(&sit);
 static byte envFltStep;
 static byte envAmpStep;
 static int8_t lfo01Step = 0;
@@ -92,8 +98,6 @@ void envSetADR(ADSR<CONTROL_RATE, CONTROL_RATE> *pEnv, int attack, int decay, in
     pEnv->setTimes(attack, decay, sustain, release);
 }
 
-#define GATE_PIN 7
-#define VOCT_PIN A7
 /// @brief GATE/CV情報受付
 void recieveGateCV()
 {
@@ -215,7 +219,6 @@ void setup()
     loadSynthPatch(&patch, conf.selectedSlot);
 
     seqGen.setBPM(conf.seqBPM);
-    seqGen.start();
     limitter.setParam(4, 2); // ratio 16:1, threshold 8191
 
     startMozzi(CONTROL_RATE);
@@ -254,6 +257,10 @@ void updateControl()
             seqGen.setEndStep(conf.seqMaxStep);
             seqGen.setChangeBar(conf.autoChangeBar);
             seqGen.autoChanger(conf.autoChange);
+            if (seqStart)
+                seqGen.start();
+            else 
+                seqGen.stop();
         }
         randomSequencer();
     }

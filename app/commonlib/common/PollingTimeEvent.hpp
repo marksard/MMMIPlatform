@@ -9,8 +9,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include "TriggerInterface.hpp"
 
-class PollingTimeEvent
+class PollingTimeEvent : public TriggerInterface
 {
 public:
     PollingTimeEvent()
@@ -19,19 +20,19 @@ public:
         setBPM(133, 4);
     }
 
-    void start()
+    void start() override
     {
         _lastMillis = millis();
         _start = 1;
     }
 
-    void stop()
+    void stop() override
     {
         _lastMillis = millis();
         _start = 0;
     }
 
-    bool ready()
+    bool ready() override
     {
         if (!_start) return false;
 
@@ -50,12 +51,12 @@ public:
         return false;
     }
 
-    void setMills(int millSec)
+    void setMills(int millSec) override
     {
         triggerTime = millSec;
     }
 
-    void setBPM(byte bpm, byte bpmReso)
+    void setBPM(byte bpm, byte bpmReso) override
     {
         triggerTime = (int)((60.0 / (bpm * bpmReso)) * 1000.0);
     }
