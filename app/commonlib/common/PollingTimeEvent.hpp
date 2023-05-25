@@ -22,6 +22,7 @@ public:
 
     void start() override
     {
+        if(_start)return;
         _lastMillis = millis();
         _start = 1;
     }
