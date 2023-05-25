@@ -22,37 +22,31 @@ public:
     SyncInTrigger()
     {
         _start = 0;
-        _pinState = 0;
     }
 
     void start() override
     {
         pinMode(_pin, INPUT);
         _start = 1;
-        _pinState = 0;
-
     }
 
     void stop() override
     {
         _start = 0;
-        _pinState = 0;
     }
 
     bool ready() override
     {
         if (!_start) return false;
 
+        static byte valueOld = 0;
         bool result = false;
         byte value = readPin();
-        // 簡単チャタ取り
-        _pinState = (_pinState << 1) | value;
-        if (_pinState == 0x80)
+        if (value != 0 && valueOld == 0)
         {
             result = true;
         }
-
-        // Serial.println(_pinState);
+        valueOld = value;
 
         return result;
     }
@@ -75,7 +69,6 @@ public:
 protected:
     byte _start;
     byte _pin;
-    byte _pinState;
 
     /// @brief ピン値読込
     /// @return
