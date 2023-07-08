@@ -251,16 +251,18 @@ byte updateUserIF()
 
     // エンコーダー操作
     int8_t enc[4] = {
-        (int8_t)encA.getDirection(),
-        (int8_t)encB.getDirection(),
-        (int8_t)encC.getDirection(),
-        (int8_t)encD.getDirection()};
+        (int8_t)encA.getDirectionWithDelta(),
+        (int8_t)encB.getDirectionWithDelta(),
+        (int8_t)encC.getDirectionWithDelta(),
+        (int8_t)encD.getDirectionWithDelta()};
     for (byte i = 0; i < 4; ++i)
     {
         (*(byte *)(valueTable[menuIndex][i])) = constrain(
             (int)*(byte *)(valueTable[menuIndex][i]) +
-                (enc[i] *
-                 (*(byte *)valMinMaxSteps[menuIndex][i][2])),
+                (enc[i]
+                //  *
+                //  (*(byte *)valMinMaxSteps[menuIndex][i][2])
+                 ),
             (*(byte *)valMinMaxSteps[menuIndex][i][0]),
             (*(byte *)valMinMaxSteps[menuIndex][i][1]));
         if (enc[i] != 0)

@@ -218,7 +218,7 @@ void setup()
     loadUserConfig(&conf);
     loadSynthPatch(&patch, conf.selectedSlot);
 
-    seqGen.setBPM(conf.seqBPM);
+    seqGen.setBPM(conf.seqBPM, 4);
     limitter.setParam(4, 2); // ratio 16:1, threshold 8191
 
     startMozzi(CONTROL_RATE);
@@ -253,7 +253,7 @@ void updateControl()
     {
         if (changed)
         {
-            seqGen.setBPM(conf.seqBPM);
+            seqGen.setBPM(conf.seqBPM, 4);
             seqGen.setEndStep(conf.seqMaxStep);
             seqGen.setChangeBar(conf.autoChangeBar);
             seqGen.autoChanger(conf.autoChange);
