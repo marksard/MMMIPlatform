@@ -104,11 +104,11 @@ public:
     virtual bool ready()
     {
         bool result = _pTrigger->ready();
-        if (result)
-        {
-            // Serial.println("trigger");
-            // Serial.println(_seqIndex);
-        }
+        // if (result)
+        // {
+        //     Serial.print("trigger: ");
+        //     Serial.println(_seqIndex);
+        // }
 
         return result;
     }
@@ -174,10 +174,10 @@ public:
 
     /// @brief BPM設定
     /// @param bpm
-    void setBPM(byte bpm)
+    void setBPM(byte bpm, byte bpmReso)
     {
         /// 解像度：16ビート
-        _pTrigger->setBPM(bpm, 4);
+        _pTrigger->setBPM(bpm, bpmReso);
     }
 
     /// @brief 終了ステップ
@@ -187,9 +187,33 @@ public:
         _endStep = constrain(endStep, 1, MAX_SEQ);
     }
 
+    /// @brief testSeqMode
+    /// @param testMode 
+    void setTestMode(byte testMode)
+    {
+        if (_testMode != testMode)
+        {
+            _testMode = testMode;
+            generate();
+        }
+        
+    }
+
     /// @brief ランダムシーケンス生成
     void generate()
     {
+        // 8分Aを4分ごと繰り返し
+        if (_testMode)
+        {
+            for (byte i = 0; i < MAX_SEQ; ++i)
+            {
+                _gate[i] = (i % 4) == 0 ? 1 : 0;//((i % 4) >= 1) && ((i % 4) <= 2) ? 2 : 0;
+                _note[i] = 9;
+                _acc[i] = (i % 4) == 0 ? 1 : 0;
+            }
+            return;
+        }
+
         byte geteSelect = random(MAX_TIMINGS);
         byte veloSelect = random(MAX_TIMINGS);
 
@@ -249,6 +273,7 @@ private:
     TriggerInterface *_pTrigger;
     byte _seqIndex = 0;
     byte _endStep = 0;
+    byte _testMode = 0;
     byte _note[MAX_SEQ] = {0};
     byte _gate[MAX_SEQ] = {0};
     byte _acc[MAX_SEQ] = {0};
@@ -279,8 +304,13 @@ public:
     bool ready() override
     {
         bool result = SequenceGenerator::ready();
-        if (!result)
-            return false;
+        return result;
+    }
+
+    void next() override
+    {
+        _barIndex++;
+        SequenceGenerator::next();
 
         // 1小節(_barIndex　16step)でカウント
         if ((_barIndex >> 4) >= _changeBar && _changeStart)
@@ -292,14 +322,6 @@ public:
         // Serial.print(_changeBar);
         // Serial.print(',');
         // Serial.println(_barIndex);
-
-        return result;
-    }
-
-    void next() override
-    {
-        _barIndex++;
-        SequenceGenerator::next();
     }
 
     void resetSeq() override
