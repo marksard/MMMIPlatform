@@ -25,7 +25,6 @@ static byte userParamSave = 0;
 static byte userParamLoad = 0;
 static byte userParamLoadDef = 0;
 static byte userConfigSave = 0;
-static byte oledPow = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 操作・表示テーブル
@@ -66,7 +65,7 @@ static const char param4[] PROGMEM = "attk dcay rels amnt";
 static const char param5[] PROGMEM = "attk dcay rels amnt";
 static const char param6[] PROGMEM = "rate >chr >osc >frq";
 static const char param7[] PROGMEM = "f.bk time amnt driv";
-static const char param9[] PROGMEM = "step disp c<>m save";
+static const char param9[] PROGMEM = "---- ---- c<>m save";
 static const char param8[] PROGMEM = "slot save load dflt";
 static const char *const paramTable[MENUMAX] PROGMEM =
     {
@@ -83,7 +82,7 @@ static const char *const paramTable[MENUMAX] PROGMEM =
         param8,
 };
 
-// static byte nullItem = 0;
+static byte nullItem = 0;
 static byte max_osc = OSC_MAX - 1;
 static byte max_oct = MAX_OCT - 1;
 static byte max_semi = MAX_SEMI - 1;
@@ -96,20 +95,20 @@ static byte min_one = 1;
 static byte max_two = 2;
 // static byte max_four = 4;
 static byte max_5bit = 32;
-static byte *valMinMaxSteps[MENUMAX][MENUCOL][3] =
+static byte *valMinMaxSteps[MENUMAX][MENUCOL][2] =
     {
         // min, max, step
-        {{&min_one, &max_8bit, &min_one}, {&min_zero, &max_5bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &min_one, &min_one}, {&min_one, &max_8bit, &min_one}, {&min_zero, &max_5bit, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
-        {{&min_zero, &max_osc, &min_one}, {&min_zero, &max_oct, &min_one}, {&min_zero, &max_semi, &min_one}, {&min_zero, &max_tune, &min_one}},
-        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_8bit, &min_one}},
-        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}},
-        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}},
-        {{&min_one, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_amnt, &min_one}},
-        {{&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_8bit, &conf.paramStep}, {&min_zero, &max_amnt, &min_one}, {&min_zero, &max_amnt, &min_one}},
-        {{&min_one, &max_8bit, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &max_two, &min_one}, {&min_zero, &min_one, &min_one}},
-        {{&min_zero, &max_save, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}, {&min_zero, &min_one, &min_one}},
+        {{&min_one, &max_8bit}, {&min_zero, &max_5bit}, {&min_zero, &min_one}, {&min_zero, &min_one}},
+        {{&min_zero, &min_one}, {&min_one, &max_8bit}, {&min_zero, &max_5bit}, {&min_zero, &min_one}},
+        {{&min_zero, &max_osc}, {&min_zero, &max_oct}, {&min_zero, &max_semi}, {&min_zero, &max_tune}},
+        {{&min_zero, &max_osc}, {&min_zero, &max_oct}, {&min_zero, &max_semi}, {&min_zero, &max_tune}},
+        {{&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_amnt}, {&min_zero, &max_8bit}},
+        {{&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_amnt}},
+        {{&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_amnt}},
+        {{&min_one, &max_8bit}, {&min_zero, &max_amnt}, {&min_zero, &max_amnt}, {&min_zero, &max_amnt}},
+        {{&min_zero, &max_8bit}, {&min_zero, &max_8bit}, {&min_zero, &max_amnt}, {&min_zero, &max_amnt}},
+        {{&min_zero, &min_zero}, {&min_zero, &min_zero}, {&min_zero, &max_two}, {&min_zero, &min_one}},
+        {{&min_zero, &max_save}, {&min_zero, &min_one}, {&min_zero, &min_one}, {&min_zero, &min_one}},
 };
 
 static void *valueTable[MENUMAX][MENUCOL] =
@@ -123,7 +122,7 @@ static void *valueTable[MENUMAX][MENUCOL] =
         {&patch.envAmp_attack, &patch.envAmp_decay, &patch.envAmp_release, &patch.envAmp_amount},
         {&patch.lfo01_freq, &patch.lfo01_amt_chorus, &patch.lfo01_amt_osc02, &patch.lfo01_amt_ffreq},
         {&patch.chorus_feedback, &patch.chorus_time, &patch.chorus_level, &patch.driveLevel},
-        {&conf.paramStep, &oledPow, &conf.inputOctVorMIDI, &userConfigSave},
+        {&nullItem, &nullItem, &conf.inputOctVorMIDI, &userConfigSave},
         {&conf.selectedSlot, &userParamSave, &userParamLoad, &userParamLoadDef},
 };
 
@@ -131,16 +130,6 @@ static void *valueTable[MENUMAX][MENUCOL] =
 /// @brief OLED初期化
 void initOLED()
 {
-    // OLED初期化前にI2Cの開始待ちをちゃんとおこなう
-    // https://github.com/datacute/Tiny4kOLED/issues/20
-    // TinyI2C.init();
-    // while (!TinyI2C.start(0x3C, 0))
-    // {
-    //     delay(10);
-    // }
-    // TinyI2C.stop();
-    // delay(50);
-    // ここからOLED初期化
     oled.begin(sizeof(tiny4koled_init_128x32), tiny4koled_init_128x32);
     oled.setFont(FONT6X8);
     oled.setContrast(64);
@@ -214,10 +203,10 @@ su constrainCyclic(su value, su min, su max)
 /// @brief 設定情報の更新
 byte updateUserIF()
 {
-    static byte lastStepMin = 0;
     static int menuIndex = 0;
-    static byte oledPowLast = 0;
-    byte reqUpdateDisp = 0;
+    static ulong lastUpdate = millis();
+    static byte reqUpdateDisp = 0;
+    byte reqUpdate = 0;
     byte reqResetDisp = 0;
 
     if (!isOLEDInit)
@@ -230,43 +219,39 @@ byte updateUserIF()
     {
         menuIndex = constrainCyclic(menuIndex - 1, 0, MENUMAX - 1);
         reqUpdateDisp = 1;
+        reqUpdate = 1;
     }
     if (stateB == 2)
     {
         menuIndex = constrainCyclic(menuIndex + 1, 0, MENUMAX - 1);
         reqUpdateDisp = 1;
-    }
-
-    // A長押しでステップ数を1に
-    if (stateA == 3 && lastStepMin == 0)
-    {
-        lastStepMin = conf.paramStep;
-        conf.paramStep = 1;
-    }
-    else if (stateA == 4 && lastStepMin != 0)
-    {
-        conf.paramStep = lastStepMin;
-        lastStepMin = 0;
+        reqUpdate = 1;
     }
 
     // エンコーダー操作
     int8_t enc[4] = {
-        (int8_t)encA.getDirectionWithDelta(),
-        (int8_t)encB.getDirectionWithDelta(),
-        (int8_t)encC.getDirectionWithDelta(),
-        (int8_t)encD.getDirectionWithDelta()};
+        (int8_t)encA.getDirection(),
+        (int8_t)encB.getDirection(),
+        (int8_t)encC.getDirection(),
+        (int8_t)encD.getDirection()};
     for (byte i = 0; i < 4; ++i)
     {
-        (*(byte *)(valueTable[menuIndex][i])) = constrain(
-            (int)*(byte *)(valueTable[menuIndex][i]) +
-                (enc[i]
-                //  *
-                //  (*(byte *)valMinMaxSteps[menuIndex][i][2])
-                 ),
-            (*(byte *)valMinMaxSteps[menuIndex][i][0]),
-            (*(byte *)valMinMaxSteps[menuIndex][i][1]));
-        if (enc[i] != 0)
+        byte min = (*(byte *)valMinMaxSteps[menuIndex][i][0]);
+        byte max = (*(byte *)valMinMaxSteps[menuIndex][i][1]);
+        byte val = *(byte *)(valueTable[menuIndex][i]);
+        int8_t encoder = enc[i];
+        int8_t step = encoder;
+        if (max <= 32)
+        {
+            step = constrain(encoder, -1, 1);
+        }
+
+        (*(byte *)(valueTable[menuIndex][i])) = constrain((int)val + step, min, max);
+        if (encoder != 0)
+        {
             reqUpdateDisp = 1;
+            reqUpdate = 1;
+        }
     }
 
     // Serial.print(stateA);
@@ -316,19 +301,18 @@ byte updateUserIF()
         menuIndex = 0;
         dispOLED(0);
     }
-    else if (reqUpdateDisp == 1)
-    {
-        if (oledPowLast != oledPow)
-        {
-            oledPowLast = oledPow;
-            if (oledPow)
-                oled.on();
-            else
-                oled.off();
-        }
 
-        dispOLED(menuIndex);
+    // 最大33ms毎更新
+    ulong now = millis();
+    if (now - lastUpdate > 33)
+    {
+        if (reqUpdateDisp)
+        {
+            dispOLED(menuIndex);
+            reqUpdateDisp = 0;
+        }
+        lastUpdate = now;
     }
 
-    return reqResetDisp | reqUpdateDisp;
+    return reqResetDisp | reqUpdate;
 }

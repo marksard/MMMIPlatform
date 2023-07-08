@@ -19,12 +19,11 @@ void initEEPROM()
 }
 
 // 設定値系
-const static char *UI_VER = "ms01conf_002\0";
+const static char *UI_VER = "ms01conf_003\0";
 struct UserConfig
 {
     char ver[14];
     byte selectedSlot;
-    byte paramStep;
     byte inputOctVorMIDI; // 0:cv 1:usbmidi 2:randomseq
     byte seqMaxStep;
     byte seqBPM;
@@ -34,7 +33,7 @@ struct UserConfig
 };
 
 // 操作系パラメータ現在値
-const static char *PARAM_VER = "ms01param002\0";
+const static char *PARAM_VER = "ms01param003\0";
 struct SynthPatch
 {
     char ver[14];
@@ -85,7 +84,6 @@ void initUserConfig(UserConfig *pUserConfig)
 {
     strcpy(pUserConfig->ver, UI_VER);
     pUserConfig->selectedSlot = -1;
-    pUserConfig->paramStep = 8;
     pUserConfig->inputOctVorMIDI = 2;
     pUserConfig->seqMaxStep = 8;
     pUserConfig->seqBPM = 133;

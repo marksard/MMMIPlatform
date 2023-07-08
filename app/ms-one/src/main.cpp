@@ -75,10 +75,9 @@ byte envAmpFree = 0;
 /// @param decay 
 /// @param x2 掛け算したい数
 /// @return 
-int getSustainTime(int decay, byte x2 = 1)
+uint16_t getSustainTime(int decay, byte x2 = 1)
 {
-    int sustain = decay >= 128 ? 200 * x2 : decay >= 196 ? 400 * x2 : decay == 255 ? 65535 : 0;
-    // Serial.println(sustain);
+    uint16_t sustain = decay == 255 ? 65535 : decay >= 196 ? 400 * x2 : decay >= 128 ? 200 * x2 : 0;
     return sustain;
 }
 
@@ -94,7 +93,7 @@ void envSetADR(ADSR<CONTROL_RATE, CONTROL_RATE> *pEnv, int attack, int decay, in
     // pEnv->setLevels(decay, min(decay << 1, 255), decay, max(min(decay << 1, release), 1));
     // pEnv->setTimes(max(attack << 2, 1), decay, decay << 8 + decay, max(release << 1, 1));
     pEnv->setADLevels(250, 250);
-    int sustain = getSustainTime(decay);
+    uint16_t sustain = getSustainTime(decay);
     pEnv->setTimes(attack, decay, sustain, release);
 }
 
