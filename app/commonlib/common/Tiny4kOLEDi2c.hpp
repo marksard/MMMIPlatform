@@ -105,14 +105,6 @@ private:
     uint8_t _address;
 };
 
-// #ifdef XIAORP2040
-// #define I2C_SDA 6
-// #define I2C_SCL 7
-// #else
-#define I2C_SDA SDA
-#define I2C_SCL SCL
-// #endif
-
 MinimamI2C MiniI2C(I2C_SDA, I2C_SCL, SSD1306);
 
 static bool datacute_write_tinyi2c(uint8_t byte)

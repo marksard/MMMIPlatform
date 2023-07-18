@@ -18,7 +18,7 @@ class RecieveMidi
 {
 public:
     RecieveMidi()
-    : midiTransport(Serial1)
+    : midiTransport(Serial2)
     , midiInterface((MidiTransport&)midiTransport)
     {
 
@@ -46,7 +46,11 @@ public:
             return false;
 
         // Serial.print("note on :");
-        // Serial.println(midiInterface.getType());
+        // Serial.print(midiInterface.getType());
+        // Serial.print(",");
+        // Serial.print(midiInterface.getData1());
+        // Serial.print(",");
+        // Serial.println(midiInterface.getData2());
 
         // _lastNotesの状態を更新
         // _lastNotesの空きスペース(-1)に詰める
@@ -69,7 +73,11 @@ public:
             return false;
 
         // Serial.print("note off :");
-        // Serial.println(midiInterface.getType());
+        // Serial.print(midiInterface.getType());
+        // Serial.print(",");
+        // Serial.print(midiInterface.getData1());
+        // Serial.print(",");
+        // Serial.println(midiInterface.getData2());
 
         // _lastNotesの状態を更新
         // _lastNotesにノート情報がひとつでも残っていればfalseとする
