@@ -39,7 +39,7 @@ public:
 
     /// @brief 動作方向を取得
     /// @return 0:none plus:clockwise minus:counter clockwise
-    int8_t getDirection()
+    int8_t getDirection(bool withoutAcc = false)
     {
         byte value1, value2;
         getPinValue(&value1, &value2);
@@ -53,11 +53,13 @@ public:
             _timePrev = _timeCurrent;
             _timeCurrent = millis();
             _index = 0;
+            if (withoutAcc) return 1;
             return getDelta();
         case 0x7:
             _timePrev = _timeCurrent;
             _timeCurrent = millis();
             _index = 0;
+            if (withoutAcc) return -1;
             return getDelta() * -1;
         default:
             return 0;
