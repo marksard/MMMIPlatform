@@ -15,10 +15,17 @@
 #define MAX_TIMINGS 4
 #define MAX_SCALE 8
 
-// フリジアンスケール
-const byte scale[MAX_SCALE] PROGMEM =
-    {
-        0, 1, 3, 5, 7, 8, 10, 12};
+// スケール
+const byte scales[7][MAX_SCALE] PROGMEM =
+{
+    {0, 2, 4, 5, 7, 9, 11, 12},     // ionian / major
+    {0, 2, 3, 5, 7, 9, 10, 12},     // dorian
+    {0, 1, 3, 5, 7, 8, 10, 12},     // phrygian
+    {0, 2, 4, 6, 7, 9, 11, 12},     // lydian
+    {0, 2, 4, 5, 7, 9, 10, 12},     // mixolydian
+    {0, 2, 3, 5, 7, 8, 10, 12},     // aeolian / natural minor
+    {0, 1, 3, 5, 6, 8, 10, 12},     // locrian
+};
 
 // メロディーを成立しやすくするための発音タイミングマップ
 // この上にランダムでタイミングを追加してランダムかつメロディーを成立しやすく
@@ -162,7 +169,7 @@ public:
     /// @return MIDIノート番号
     byte getNote()
     {
-        return _note[_seqIndex];
+        return _oct[_seqIndex] + (byte)pgm_read_byte(&scales[_scaleIndex][_note[_seqIndex]]);
     }
 
     /// @brief アクセント取得
@@ -199,6 +206,11 @@ public:
         
     }
 
+    void setScale(byte scaleIndex)
+    {
+        _scaleIndex = scaleIndex;
+    }
+
     /// @brief ランダムシーケンス生成
     void generate()
     {
@@ -208,7 +220,8 @@ public:
             for (byte i = 0; i < MAX_SEQ; ++i)
             {
                 _gate[i] = (i % 4) == 0 ? 1 : 0;//((i % 4) >= 1) && ((i % 4) <= 2) ? 2 : 0;
-                _note[i] = 9;
+                _oct[i] = 0;
+                _note[i] = 7;
                 _acc[i] = (i % 4) == 0 ? 1 : 0;
             }
             return;
@@ -233,25 +246,26 @@ public:
 
             // 基音(C0) + 音階はスケールに従いつつランダムで + オクターブ上下移動をランダムで(-1 or 0 or 1 * 12)
             // 0 ~ 24 + スケール音
-            _note[i] = 12 + (byte)pgm_read_byte(&scale[random(MAX_SCALE)]) + (random(-1, 2) * 12);
+            _oct[i] = 12 + (random(-1, 2) * 12);
+            _note[i] = random(MAX_SCALE);
         }
 
         // 追加でスライドタイミングを適当に追加
         for (byte count = 0; count < 2; ++count)
         {
-            byte lastNote = 0;
+            byte lastOct = 0;
             byte lastGate = 0;
             for (byte i = random(1, MAX_SEQ - 4); i < MAX_SEQ; ++i)
             {
                 // 1オクターブ離れていて、音が鳴る場合
-                if (abs(lastNote - _note[i]) >= 12 && lastGate >= 1 && _gate[i] >= 1)
+                if (abs(lastOct - _oct[i]) >= 12 && lastGate >= 1 && _gate[i] >= 1)
                 {
                     // _acc[i - 1] = random(2); // acc
                     _gate[i] = 2; // スライド
                     break;
                 }
 
-                lastNote = _note[i];
+                lastOct = _oct[i];
                 lastGate = _gate[i];
             }
         }
@@ -274,6 +288,8 @@ private:
     byte _seqIndex = 0;
     byte _endStep = 0;
     byte _testMode = 0;
+    byte _scaleIndex = 2;
+    byte _oct[MAX_SEQ] = {0};
     byte _note[MAX_SEQ] = {0};
     byte _gate[MAX_SEQ] = {0};
     byte _acc[MAX_SEQ] = {0};
