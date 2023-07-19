@@ -111,13 +111,33 @@ public:
     virtual bool ready()
     {
         bool result = _pTrigger->ready();
-        // if (result)
-        // {
-        //     Serial.print("trigger: ");
-        //     Serial.println(_seqIndex);
-        // }
+        if (result)
+        {
+            // Serial.println("ready");
+            // Serial.println(_seqIndex);
+
+            _seqReadyCount++;
+            if (_seqReadyCount >= _seqReadyCountMax)
+            {
+                _seqReadyCount = 0;
+                _seqReady = 1;
+            }
+        }
 
         return result;
+    }
+
+    virtual bool seqReady()
+    {
+        if (_seqReady)
+        {
+            _seqReady = 0;
+            // Serial.print("seqReady: ");
+            // Serial.println(_seqIndex);
+            return 1;
+        }
+
+        return 0;
     }
 
     /// @brief EventDelayに同じ
@@ -185,6 +205,7 @@ public:
     {
         /// 解像度：16ビート
         _pTrigger->setBPM(bpm, bpmReso);
+        _seqReadyCountMax = bpmReso / 4;
     }
 
     /// @brief 終了ステップ
@@ -293,6 +314,9 @@ private:
     byte _note[MAX_SEQ] = {0};
     byte _gate[MAX_SEQ] = {0};
     byte _acc[MAX_SEQ] = {0};
+    byte _seqReady = 0;
+    byte _seqReadyCount = 0;
+    byte _seqReadyCountMax = 0;
 };
 
 class SequenceAutoChanger : public SequenceGenerator
