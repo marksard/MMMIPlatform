@@ -143,7 +143,7 @@ void recieveMIDI()
         }
     }
 
-    byte lastNote = rmu.getNote() - 24;
+    byte lastNote = rmu.getNote();
     osc.setFreq_Q16n16(Oscillator::Select::OSC01, lastNote, patch.osc01_oct, patch.osc01_semi, patch.osc01_detune);
     int add = patch.osc02_detune + AMOUNT((int)lfo01Step, patch.lfo01_amt_osc02, 8);
     osc.setFreq_Q16n16(Oscillator::Select::OSC02, lastNote, patch.osc02_oct, patch.osc02_semi, add);
@@ -164,22 +164,25 @@ void randomSequencer()
 
     if (seqGen.ready())
     {
-        if (!seqStart)
-        {
-            seq2PPQ = 0;
-            digitalWrite(GATE_PIN, LOW);
-            seqGen.resetSeq();
-            envFlt.noteOff();
-            envAmp.noteOff();
-            return;
-        }
-
         seq2PPQ++;
         if (seq2PPQ & 1)
             digitalWrite(GATE_PIN, HIGH);
         else
             digitalWrite(GATE_PIN, LOW);
+    }
 
+    if (!seqStart)
+    {
+        seq2PPQ = 0;
+        digitalWrite(GATE_PIN, LOW);
+        seqGen.resetSeq();
+        envFlt.noteOff();
+        envAmp.noteOff();
+        return;
+    }
+
+    if (seqGen.seqReady())
+    {
         lastNote = seqGen.getNote();
         if (seqGen.isNoteOn())
         {
@@ -256,6 +259,7 @@ void updateControl()
             seqGen.setEndStep(conf.seqMaxStep);
             seqGen.setChangeBar(conf.autoChangeBar);
             seqGen.autoChanger(conf.autoChange);
+            seqGen.setScale(conf.seqScale);
             if (seqStart)
                 seqGen.start();
             else 
@@ -279,13 +283,13 @@ void updateControl()
         lfo01.setFreq((float)(patch.lfo01_freq * 0.05));
         lfo02.setFreq((float)(patch.lfo01_freq * 0.12));
 
-        chorus.setFeedbackLevel(patch.chorus_feedback - 128);
+        chorus.setFeedbackLevel(patch.delay_feedback - 128);
 
         overDrive.setParam(patch.driveLevel, patch.driveLevel);
     }
 
     // コーラス情報更新
-    uint16_t time_amt = constrain(patch.chorus_time + AMOUNT(lfo02Step, patch.lfo01_amt_chorus, 8), 0, 255);
+    uint16_t time_amt = constrain(patch.delay_time + AMOUNT(lfo02Step, patch.lfo01_amt_delay, 8), 0, 255);
     time_amt = (time_amt << 8) + time_amt; // 8bit持ち上げるだけじゃなく、足してあげないと良い感じにならんので…
     chorus.setDelayTimeCells(time_amt);
 
@@ -321,15 +325,15 @@ AudioOutput_t updateAudio()
     // 5-8はちょっと増幅しとく
     sound = sound << (patch.driveLevel > 4 ? patch.driveLevel >> 1 : 0);
 
-    // コーラス・フランジャー(入力はint8_tなので8bitシフトして、任意の大きさに戻す)
-    if (patch.chorus_level == 8)
+    // ディレイ(入力はint8_tなので8bitシフトして、任意の大きさに戻す)
+    if (patch.delay_level == 8)
     {
         // エフェクト音のみ
         sound = chorus.next(sound >> 8) << 8;
     }
-    else if (patch.chorus_level > 0)
+    else if (patch.delay_level > 0)
     {
-        sound = (sound + (chorus.next(sound >> 8) << patch.chorus_level));
+        sound = (sound + (chorus.next(sound >> 8) << patch.delay_level));
     }
 
     // リミッター

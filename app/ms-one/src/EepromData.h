@@ -19,7 +19,7 @@ void initEEPROM()
 }
 
 // 設定値系
-const static char *UI_VER = "ms01conf_003\0";
+const static char *UI_VER = "ms01conf_002\0";
 struct UserConfig
 {
     char ver[14];
@@ -27,13 +27,14 @@ struct UserConfig
     byte inputOctVorMIDI; // 0:cv 1:usbmidi 2:randomseq
     byte seqMaxStep;
     byte seqBPM;
+    byte seqScale;
     byte setVOctCalibration;
     byte autoChange;
     byte autoChangeBar;
 };
 
 // 操作系パラメータ現在値
-const static char *PARAM_VER = "ms01param003\0";
+const static char *PARAM_VER = "ms01param002\0";
 struct SynthPatch
 {
     char ver[14];
@@ -60,16 +61,16 @@ struct SynthPatch
     byte envAmp_amount;
 
     byte lfo01_freq;
-    byte lfo01_amt_chorus;
+    byte lfo01_amt_delay;
     byte lfo01_amt_osc02;
     byte lfo01_amt_ffreq;
 
     byte flt_Freq;
     byte flt_Reso;
 
-    byte chorus_feedback;
-    byte chorus_time;
-    byte chorus_level;
+    byte delay_feedback;
+    byte delay_time;
+    byte delay_level;
 
     byte driveLevel;
     byte slideTime;
@@ -86,10 +87,11 @@ void initUserConfig(UserConfig *pUserConfig)
     pUserConfig->selectedSlot = -1;
     pUserConfig->inputOctVorMIDI = 2;
     pUserConfig->seqMaxStep = 8;
-    pUserConfig->seqBPM = 133;
+    pUserConfig->seqBPM = 155;
+    pUserConfig->seqScale = 2;
     pUserConfig->setVOctCalibration = 100;
     pUserConfig->autoChange = 0;
-    pUserConfig->autoChangeBar = 4;
+    pUserConfig->autoChangeBar = 8;
 }
 
 void loadUserConfig(UserConfig *pUserConfig)
@@ -121,41 +123,41 @@ void saveSelectedSlot(byte selectedSlot)
 void initSynthPatch(SynthPatch *pPatch)
 {
     strcpy(pPatch->ver, PARAM_VER);
-    pPatch->osc01_wave = 0;
-    pPatch->osc01_oct = 1;
-    pPatch->osc01_semi = 0;
-    pPatch->osc01_detune = 0;
-    pPatch->osc01_vol = 4; // osc1/2のバランスで使用
+    pPatch->osc01_wave = 3;
+    pPatch->osc01_oct = 3;
+    pPatch->osc01_semi = 5;
+    pPatch->osc01_detune = 3;
+    pPatch->osc01_vol = 7;
 
-    pPatch->osc02_wave = 0;
-    pPatch->osc02_oct = 2;
-    pPatch->osc02_semi = 0;
-    pPatch->osc02_detune = 3;
-    pPatch->osc02_vol = 0; // 未使用
+    pPatch->osc02_wave = 1;
+    pPatch->osc02_oct = 3;
+    pPatch->osc02_semi = 10;
+    pPatch->osc02_detune = 2;
+    pPatch->osc02_vol = 7;
 
     pPatch->envFlt_attack = 0;
-    pPatch->envFlt_decay = 80;
-    pPatch->envFlt_release = 44;
-    pPatch->envFlt_amount = 7;
+    pPatch->envFlt_decay = 111;
+    pPatch->envFlt_release = 252;
+    pPatch->envFlt_amount = 3;
 
     pPatch->envAmp_attack = 0;
-    pPatch->envAmp_decay = 47;
-    pPatch->envAmp_release = 60;
+    pPatch->envAmp_decay = 22;
+    pPatch->envAmp_release = 88;
     pPatch->envAmp_amount = 8;
 
     pPatch->lfo01_freq = 1;
-    pPatch->lfo01_amt_chorus = 0;
-    pPatch->lfo01_amt_osc02 = 0;
-    pPatch->lfo01_amt_ffreq = 8;
+    pPatch->lfo01_amt_delay = 0;
+    pPatch->lfo01_amt_osc02 = 1;
+    pPatch->lfo01_amt_ffreq = 5;
 
-    pPatch->flt_Freq = 47;
-    pPatch->flt_Reso = 240;
+    pPatch->flt_Freq = 56;
+    pPatch->flt_Reso = 245;
 
-    pPatch->chorus_feedback = 127;
-    pPatch->chorus_time = 127;
-    pPatch->chorus_level = 7;
+    pPatch->delay_feedback = 224;
+    pPatch->delay_time = 168;
+    pPatch->delay_level = 6;
 
-    pPatch->driveLevel = 0;
+    pPatch->driveLevel = 5;
     pPatch->slideTime = 0;
 }
 

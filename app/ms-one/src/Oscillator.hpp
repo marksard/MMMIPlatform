@@ -112,7 +112,7 @@ public:
 
     void setFreq_Q16n16(Select osc, byte midiNote, byte oct, byte semi, int16_t add)
     {
-        Q16n16 note = Q16n16_mtof(Q8n0_to_Q16n16(((oct + 1) * 12) + semi + midiNote));
+        Q16n16 note = Q16n16_mtof(Q8n0_to_Q16n16((oct * 12) + semi + midiNote));
 
         if (_slideTime > 0)
         {

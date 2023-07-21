@@ -120,8 +120,8 @@ static void *valueTable[MENUMAX][MENUCOL] =
         {&patch.flt_Freq, &patch.flt_Reso, &patch.osc01_vol, &conf.setVOctCalibration},
         {&patch.envFlt_attack, &patch.envFlt_decay, &patch.envFlt_release, &patch.envFlt_amount},
         {&patch.envAmp_attack, &patch.envAmp_decay, &patch.envAmp_release, &patch.envAmp_amount},
-        {&patch.lfo01_freq, &patch.lfo01_amt_chorus, &patch.lfo01_amt_osc02, &patch.lfo01_amt_ffreq},
-        {&patch.chorus_feedback, &patch.chorus_time, &patch.chorus_level, &patch.driveLevel},
+        {&patch.lfo01_freq, &patch.lfo01_amt_delay, &patch.lfo01_amt_osc02, &patch.lfo01_amt_ffreq},
+        {&patch.delay_feedback, &patch.delay_time, &patch.delay_level, &patch.driveLevel},
         {&nullItem, &nullItem, &conf.inputOctVorMIDI, &userConfigSave},
         {&conf.selectedSlot, &userParamSave, &userParamLoad, &userParamLoadDef},
 };
