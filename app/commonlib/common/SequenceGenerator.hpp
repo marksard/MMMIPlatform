@@ -201,6 +201,7 @@ public:
 
     /// @brief BPM設定
     /// @param bpm
+    /// @param bpmReso 4の倍数を想定。4,8,24あたり
     void setBPM(byte bpm, byte bpmReso)
     {
         /// 解像度：16ビート

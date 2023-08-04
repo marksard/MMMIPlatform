@@ -3,13 +3,14 @@
  * Copyright 2023 marksard
  * This software is released under the MIT license.
  * see https://opensource.org/licenses/MIT
- */ 
+ */
 
 #pragma once
 
 #include <Arduino.h>
 #include <MIDI.h>
-#include <HardwareSerial.h>
+
+#include "../../commonlib/common/CircularBuffer16.hpp"
 
 #define MAX_USBMIDI_NOTE 4
 
@@ -18,8 +19,7 @@ class RecieveMidi
 {
 public:
     RecieveMidi()
-    : midiTransport(Serial2)
-    , midiInterface((MidiTransport&)midiTransport)
+        : midiTransport(Serial2), midiInterface((MidiTransport &)midiTransport)
     {
 
         for (int8_t i = 0; i < MAX_USBMIDI_NOTE; ++i)
@@ -27,7 +27,7 @@ public:
         _lastOnNote = 0;
     }
 
-    void setup()
+    virtual void setup()
     {
         midiInterface.begin(1);
     }
@@ -109,11 +109,11 @@ public:
             _lastOnNote = _lastNotes[i];
             return _lastOnNote;
         }
-        
+
         return _lastOnNote;
     }
 
-private:
+protected:
     using MidiTransport = MIDI_NAMESPACE::SerialMIDI<HardwareSerial>;
     using MidiInterface = MIDI_NAMESPACE::MidiInterface<MidiTransport>;
 
@@ -122,4 +122,62 @@ private:
 
     int8_t _lastNotes[MAX_USBMIDI_NOTE];
     byte _lastOnNote;
+};
+
+class SendRecvMIDI : public RecieveMidi
+{
+public:
+    SendRecvMIDI(byte midiCh):RecieveMidi()
+    {
+        _midiCh = midiCh;
+    }
+
+    void setup() override
+    {
+        RecieveMidi::setup();
+        midiInterface.sendSystemReset();
+        allSoundOff();
+    }
+
+    void allSoundOff()
+    {
+        midiInterface.sendControlChange(120, 0, _midiCh); // All sound off
+    }
+
+    void sendClock()
+    {
+        midiInterface.sendRealTime(midi::MidiType::Clock);
+    }
+
+    void noteOn(byte note, byte velo, byte transpose)
+    {
+        // リングバッファ数を超えないように
+        if (noteOnCount >= 15)
+            return;
+        byte noteValue = note + transpose;
+        midiInterface.sendNoteOn(noteValue, velo, _midiCh);
+        // ノートオンとオフは対で対応しないといけないため、バッファに貯めてオフに備える
+        notesBuf.push(noteValue);
+        noteOnCount++;
+        // Serial.print("note on count:");
+        // Serial.println(noteOnCount);
+    }
+
+    void noteOff()
+    {
+        // ノートオンしたノートを全部オフにする
+        for (byte i = 0; i < noteOnCount; ++i)
+        {
+            byte note = notesBuf.pop();
+            midiInterface.sendNoteOff(note, 0, _midiCh);
+            // Serial.print("note off:");
+            // Serial.println(note);
+        }
+        noteOnCount = 0;
+    }
+
+private:
+    CircularBuffer16<uint8_t> notesBuf;
+    byte noteOnCount = 0;
+    byte _midiCh = 1;
 };
