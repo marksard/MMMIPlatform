@@ -151,9 +151,13 @@ public:
 
     void noteOn(byte note, byte velo, byte transpose)
     {
-        // リングバッファ数を超えないように
+        // リングバッファ数を超えたら最初の音をオフにする
         if (noteOnCount >= 15)
-            return;
+        {
+            byte note = notesBuf.pop();
+            midiInterface.sendNoteOff(note, 0, _midiCh);
+            // return;
+        }
         byte noteValue = note + transpose;
         midiInterface.sendNoteOn(noteValue, velo, _midiCh);
         // ノートオンとオフは対で対応しないといけないため、バッファに貯めてオフに備える

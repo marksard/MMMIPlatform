@@ -9,7 +9,7 @@
 
 #define RE_DELTA_THRESHOLD_COUNT 5
 static const byte _thresholds[RE_DELTA_THRESHOLD_COUNT] = {10, 20, 40, 60, 80};
-static const byte _deltas[RE_DELTA_THRESHOLD_COUNT] = {32, 16, 8, 4, 2};
+static const byte _deltas[RE_DELTA_THRESHOLD_COUNT] = {12, 6, 3, 2, 1};
 
 class RotaryEncoder
 {

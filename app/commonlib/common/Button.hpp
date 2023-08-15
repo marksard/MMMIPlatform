@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <Arduino.h>
+
 class Button
 {
 public:
@@ -26,6 +28,12 @@ public:
         _holdTime = 500;
 
         pinMode(pin, INPUT_PULLUP);
+
+        // 空読み
+        for(int i = 0; i < 8; ++i)
+        {
+            getState();
+        }
     }
 
     /// @brief ボタン状態を取得
