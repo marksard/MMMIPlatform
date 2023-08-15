@@ -1,3 +1,4 @@
 app/_build/
-.vscode
+.vscode/
 *.code-workspace
+.pio/
